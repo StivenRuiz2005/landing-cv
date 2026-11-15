@@ -1,59 +1,64 @@
 ---
-import quests from '../data/experience.json';
+import { ui, type Lang } from '../i18n/ui';
+import { getData } from '../i18n/data';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+const q = t.quests;
+const quests = getData(lang).experience;
 ---
 
 <section id="experience" class="section-container" aria-labelledby="experience-heading">
   <div class="mx-auto max-w-4xl">
     <div class="reveal">
       <h2 id="experience-heading" class="heading-pixel mb-6">
-        <span aria-hidden="true">🎯</span> EXPERIENCIA <span aria-hidden="true">🎯</span>
+        <span aria-hidden="true">🎯</span> {q.heading} <span aria-hidden="true">🎯</span>
       </h2>
-      <p class="mx-auto mb-12 max-w-2xl text-center text-muted">
-        Mi recorrido como un mapa de misiones: de lo más reciente a lo más antiguo.
-      </p>
+      <p class="mx-auto mb-12 max-w-2xl text-center text-muted">{q.intro}</p>
     </div>
 
     <ol class="timeline" role="list">
-      {quests.map((q) => (
+      {quests.map((item) => (
         <li class="reveal timeline-item">
-          <span class="timeline-node" aria-hidden="true">{q.icon}</span>
+          <span class="timeline-node" aria-hidden="true">{item.icon}</span>
 
-          <article class="glass-panel rounded-xl p-5 sm:p-6" aria-labelledby={`quest-${q.id}`}>
+          <article class="glass-panel rounded-xl p-5 sm:p-6" aria-labelledby={`quest-${item.id}`}>
             <div class="mb-3 flex flex-wrap items-center gap-2">
-              <span class={`badge ${q.status === 'EN CURSO' ? 'badge-active' : 'badge-done'}`}>
-                {q.status}
+              <span class={`badge ${item.status === 'active' ? 'badge-active' : 'badge-done'}`}>
+                {item.status === 'active' ? q.active : q.done}
               </span>
               <span class="font-pixel text-[0.6rem] text-muted">
-                {q.type === 'work' ? 'MISIÓN PRINCIPAL' : 'ENTRENAMIENTO'}
+                {item.type === 'work' ? q.main : q.training}
               </span>
             </div>
 
-            <h3 id={`quest-${q.id}`} class="text-xl font-bold text-ink">{q.role}</h3>
-            <p class="mt-1 font-semibold text-game-cyan">{q.org}</p>
-            <p class="mb-3 text-sm text-muted">{q.period}</p>
+            <h3 id={`quest-${item.id}`} class="text-xl font-bold text-ink">{item.role}</h3>
+            <p class="mt-1 font-semibold text-game-cyan">{item.org}</p>
+            <p class="mb-3 text-sm text-muted">{item.period}</p>
 
-            <p class="mb-3 text-muted">{q.summary}</p>
+            <p class="mb-3 text-muted">{item.summary}</p>
 
-            {q.highlights.length > 0 && (
+            {item.highlights.length > 0 && (
               <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm text-muted marker:text-game-cyan">
-                {q.highlights.map((h) => <li>{h}</li>)}
+                {item.highlights.map((h: string) => <li>{h}</li>)}
               </ul>
             )}
 
-            <ul class="flex flex-wrap gap-2" role="list" aria-label="Tecnologías">
-              {q.tags.map((t) => <li class="chip">{t}</li>)}
+            <ul class="flex flex-wrap gap-2" role="list" aria-label={q.techs}>
+              {item.tags.map((tag) => <li class="chip">{tag}</li>)}
             </ul>
 
-            {q.url && (
+            {item.url && (
               <a
-                href={q.url}
+                href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 class="mt-4 inline-flex min-h-[44px] items-center gap-2 font-semibold text-game-cyan underline underline-offset-4 hover:text-game-cyan-light"
               >
-                {q.urlLabel}
+                {item.urlLabel}
                 <span aria-hidden="true">↗</span>
-                <span class="sr-only">(abre en una pestaña nueva)</span>
+                <span class="sr-only">{t.newTab}</span>
               </a>
             )}
           </article>
@@ -71,7 +76,6 @@ import quests from '../data/experience.json';
     gap: 2rem;
   }
 
-  /* Línea del mapa de progreso */
   .timeline::before {
     content: '';
     position: absolute;
@@ -79,16 +83,10 @@ import quests from '../data/experience.json';
     top: 0.5rem;
     bottom: 0.5rem;
     width: 4px;
-    background: repeating-linear-gradient(
-      to bottom,
-      var(--blue) 0 10px,
-      transparent 10px 18px
-    );
+    background: repeating-linear-gradient(to bottom, var(--blue) 0 10px, transparent 10px 18px);
   }
 
-  .timeline-item {
-    position: relative;
-  }
+  .timeline-item { position: relative; }
 
   .timeline-node {
     position: absolute;
@@ -116,9 +114,7 @@ import quests from '../data/experience.json';
     color: var(--accent);
     background: color-mix(in srgb, var(--accent) 12%, transparent);
   }
-  .badge-done {
-    color: var(--muted);
-  }
+  .badge-done { color: var(--muted); }
 
   .chip {
     padding: 0.2rem 0.6rem;

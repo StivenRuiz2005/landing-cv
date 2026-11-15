@@ -1,5 +1,5 @@
 ---
-// Sistema de XP y niveles: avisos rápidos, agrupados y sin saturar.
+// Sistema de XP y niveles. Los textos vienen del idioma activo.
 ---
 
 <div
@@ -38,21 +38,16 @@
 </style>
 
 <script>
+  import { t, fmt } from '../i18n/client';
+
   const KEY = 'game';
   const XP_PER_SECTION = 150;
-  const QUIET_MS = 400;     // pausa de scroll antes de avisar
-  const WARMUP_MS = 1000;   // sin avisos el primer segundo
-  const SHOW_MS = 3000;     // duración de cada aviso
-  const GROUP_MS = 250;     // agrupa secciones que llegan juntas
+  const QUIET_MS = 400;
+  const WARMUP_MS = 1000;
+  const SHOW_MS = 3000;
+  const GROUP_MS = 250;
 
-  const SECTIONS: Record<string, string> = {
-    about: 'SOBRE MI',
-    skills: 'HABILIDADES',
-    experience: 'EXPERIENCIA',
-    projects: 'PROYECTOS',
-    achievements: 'LOGROS',
-    contact: 'NUEVA MISIÓN',
-  };
+  const SECTIONS: Record<string, string> = t.game.sections;
 
   type State = { xp: number; seen: string[] };
   let state: State = { xp: 0, seen: [] };
@@ -96,19 +91,19 @@
       setTimeout(pump, 200);
       return;
     }
-    const t = queue.shift()!;
+    const item = queue.shift()!;
     const box = document.getElementById('toasts');
     if (!box) return;
     showing = true;
 
     const el = document.createElement('div');
-    el.className = `toast${t.levelup ? ' levelup' : ''}`;
+    el.className = `toast${item.levelup ? ' levelup' : ''}`;
     const title = document.createElement('p');
     title.className = 't-title';
-    title.textContent = t.title;
+    title.textContent = item.title;
     const body = document.createElement('p');
     body.className = 't-body';
-    body.textContent = t.body;
+    body.textContent = item.body;
     el.append(title, body);
     box.replaceChildren(el);
 
@@ -122,9 +117,9 @@
     }, SHOW_MS);
   }
 
-  function notify(t: Toast) {
-    if (t.urgent) queue.unshift(t);
-    else queue.push(t);
+  function notify(item: Toast) {
+    if (item.urgent) queue.unshift(item);
+    else queue.push(item);
     pump();
   }
 
@@ -140,16 +135,16 @@
     const after = levelOf(state.xp);
     notify({
       title: `+${xp} XP`,
-      body: labels.length === 1 ? labels[0] : `Descubriste ${labels.length} secciones`,
+      body: labels.length === 1 ? labels[0] : fmt(t.game.many, { n: labels.length }),
     });
     if (after > before) {
-      notify({ title: '¡LEVEL UP!', body: `Ahora eres nivel ${after}`, levelup: true });
+      notify({ title: t.game.levelup, body: fmt(t.game.nowLevel, { n: after }), levelup: true });
     }
   }
 
   function award(id: string, xp: number, label: string, urgent = false) {
     if (state.seen.includes(id)) {
-      if (urgent) notify({ title: '🏆 YA LO TENÍAS', body: label, urgent: true });
+      if (urgent) notify({ title: t.game.already, body: label, urgent: true });
       return;
     }
     const before = levelOf(state.xp);
@@ -162,7 +157,7 @@
       notify({ title: `+${xp} XP`, body: label, urgent: true });
       const after = levelOf(state.xp);
       if (after > before) {
-        notify({ title: '¡LEVEL UP!', body: `Ahora eres nivel ${after}`, levelup: true, urgent: true });
+        notify({ title: t.game.levelup, body: fmt(t.game.nowLevel, { n: after }), levelup: true, urgent: true });
       }
     } else {
       pending.xp += xp;
@@ -173,7 +168,7 @@
 
     const all = Object.keys(SECTIONS).every((s) => state.seen.includes(s));
     if (all && !state.seen.includes('explorer')) {
-      setTimeout(() => award('explorer', 100, '🏆 Explorador completo'), 1200);
+      setTimeout(() => award('explorer', 100, t.game.explorer), 1200);
     }
   }
 
@@ -186,7 +181,7 @@
         if (!entry.isIntersecting) return;
         const id = entry.target.id;
         io.unobserve(entry.target);
-        award(id, XP_PER_SECTION, `Descubriste ${SECTIONS[id]}`);
+        award(id, XP_PER_SECTION, fmt(t.game.discovered, { name: SECTIONS[id] }));
       });
     },
     { threshold: 0, rootMargin: '0px 0px -35% 0px' }
@@ -196,7 +191,7 @@
     if (el) io.observe(el);
   });
 
-  /* ---------- Eventos externos (Konami, mensaje enviado) ---------- */
+  /* ---------- Eventos externos (Konami, CV, mensaje) ---------- */
   window.addEventListener('game:award', (e) => {
     const d = (e as CustomEvent).detail;
     award(d.id, d.xp, d.label, !!d.urgent);

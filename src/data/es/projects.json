@@ -1,0 +1,85 @@
+[
+  {
+    "id": "saber11",
+    "kind": "PROYECTO ACADÉMICO",
+    "icon": "📊",
+    "title": "Análisis predictivo de las Pruebas Saber 11",
+    "description": "Análisis de datos y Machine Learning para estudiar y predecir el desempeño académico: ETL, más de 7 millones de registros, dashboards y un modelo con LightGBM.",
+    "highlights": [
+      "Procesamiento y transformación de grandes volúmenes de datos.",
+      "Modelo predictivo integrado con herramientas de visualización."
+    ],
+    "tech": [
+      "Python",
+      "Pandas",
+      "NumPy",
+      "LightGBM",
+      "MongoDB",
+      "Next.js",
+      "NestJS",
+      "Docker"
+    ],
+    "link": null,
+    "linkLabel": ""
+  },
+  {
+    "id": "microservicios",
+    "kind": "PROYECTO UNIVERSITARIO",
+    "icon": "☁️",
+    "title": "Microservicios para órdenes de compra y entregas",
+    "description": "Arquitectura de microservicios para una tienda en línea, con arquitectura limpia, comunicación asíncrona y despliegue en la nube. Feb – Jun 2025.",
+    "highlights": [
+      "API Gateway, descubrimiento de servicios y mensajería con RabbitMQ.",
+      "CI/CD con GitHub Actions, monitoreo con Prometheus y Grafana.",
+      "Infraestructura en AWS: IAM, ALB, RDS, EKS y ECR."
+    ],
+    "tech": [
+      "Java",
+      "Spring Boot",
+      "Spring Cloud",
+      "Angular",
+      "Docker",
+      "Kubernetes",
+      "RabbitMQ",
+      "PostgreSQL",
+      "AWS"
+    ],
+    "link": null,
+    "linkLabel": ""
+  },
+  {
+    "id": "invessoft-platform",
+    "kind": "EXPERIENCIA PROFESIONAL",
+    "icon": "📋",
+    "title": "Gestión de encuestas y eventos – Invessoft",
+    "description": "Módulos de una plataforma empresarial para eventos, encuestas, evaluaciones y procesos administrativos.",
+    "highlights": [
+      "Módulos frontend y backend, autenticación personalizable por evento.",
+      "Filtros, validaciones, corrección de incidencias y pruebas automatizadas."
+    ],
+    "tech": [
+      "Angular",
+      "TypeScript",
+      "NestJS",
+      "Node.js",
+      "PostgreSQL",
+      "TypeORM"
+    ],
+    "link": "https://invessoft.app",
+    "linkLabel": "Ver plataforma"
+  },
+  {
+    "id": "landing-cv",
+    "kind": "PROYECTO PERSONAL",
+    "icon": "🎮",
+    "title": "Portafolio profesional – Landing CV",
+    "description": "Este sitio: un portafolio con temática gaming, modo claro/oscuro, accesibilidad, versión bilingüe y organización modular.",
+    "highlights": [
+      "Separación de responsabilidades y contenido editable desde archivos de datos.",
+      "Accesible: teclado, lector de pantalla y respeto a prefers-reduced-motion."
+    ],
+    "tech": ["Astro", "TypeScript", "Tailwind CSS", "Node.js", "pnpm"],
+    "link": null,
+    "linkLabel": ""
+  }
+]

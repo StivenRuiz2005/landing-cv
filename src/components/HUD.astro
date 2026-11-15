@@ -1,8 +1,24 @@
 ---
-// Barra superior tipo HUD: logo, nivel, navegación, barra de XP, pausa de animaciones y tema.
+import { ui, paths, type Lang } from '../i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+const n = t.nav;
+
+const links = [
+  { id: 'about', label: n.about, mLabel: n.about, icon: '📖' },
+  { id: 'skills', label: n.skills, mLabel: n.skills, icon: '⚔️' },
+  { id: 'experience', label: n.quests, mLabel: n.mQuests, icon: '🎯' },
+  { id: 'projects', label: n.projects, mLabel: n.projects, icon: '🎮' },
+  { id: 'achievements', label: n.trophies, mLabel: n.trophies, icon: '🏆' },
+  { id: 'contact', label: n.contact, mLabel: n.contact, icon: '💬' },
+];
+
+const otherLang = n.switchLang as Lang;
 ---
 
-<nav id="hud" class="fixed top-0 left-0 right-0 z-40 transition-transform duration-300" aria-label="Navegación principal">
+<nav id="hud" class="fixed top-0 left-0 right-0 z-40 transition-transform duration-300" aria-label={n.aria}>
   <div class="glass-panel border-x-0 border-t-0">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between gap-4">
@@ -12,7 +28,7 @@
           <a
             href="#hero"
             class="flex min-h-[44px] items-center font-pixel text-xs text-game-cyan transition-colors hover:text-game-cyan-light sm:text-sm"
-            aria-label="Volver al inicio"
+            aria-label={n.home}
           >
             <span class="hidden sm:inline">CARLOS.DEV</span>
             <span class="sm:hidden" aria-hidden="true">CR</span>
@@ -25,12 +41,7 @@
 
         <!-- Centro: enlaces -->
         <div class="hidden items-center gap-1 md:flex lg:gap-2">
-          <a href="#about" class="nav-link">SOBRE MI</a>
-          <a href="#skills" class="nav-link">HABILIDADES</a>
-          <a href="#experience" class="nav-link">EXPERIENCIA</a>
-          <a href="#projects" class="nav-link">PROYECTOS</a>
-          <a href="#achievements" class="nav-link">LOGROS</a>
-          <a href="#contact" class="nav-link">CONTACTO</a>
+          {links.map((l) => <a href={`#${l.id}`} class="nav-link">{l.label}</a>)}
         </div>
 
         <!-- Derecha: XP + controles -->
@@ -44,7 +55,7 @@
             <div
               class="h-2 overflow-hidden border border-game-blue/60 bg-game-dark-light"
               role="progressbar"
-              aria-label="Progreso de desplazamiento de la página"
+              aria-label={n.progress}
               aria-valuemin="0"
               aria-valuemax="100"
               aria-valuenow="0"
@@ -58,21 +69,48 @@
             </div>
           </div>
 
+          <!-- Descargar CV -->
+          <a
+            href={t.cvFile}
+            download={t.cvFile.slice(1)}
+            data-cv
+            class="icon-btn hidden lg:inline-flex"
+            title={n.cv}
+          >
+            <span class="sr-only">{n.cv}</span>
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14" />
+            </svg>
+          </a>
+
+          <!-- Cambiar idioma: es un enlace porque navega a otra página -->
+          <a
+            id="lang-switch"
+            href={paths[otherLang]}
+            hreflang={otherLang}
+            lang={otherLang}
+            class="icon-btn font-pixel text-[0.6rem]"
+            title={n.switchName}
+          >
+            <span aria-hidden="true">{n.switchCode}</span>
+            <span class="sr-only">{n.switchName}</span>
+          </a>
+
           <!-- Pausar animaciones -->
           <button id="motion-toggle" type="button" class="icon-btn motion-btn">
-            <span class="sr-only">Pausar animaciones</span>
+            <span class="sr-only">{t.a11y.pause}</span>
             <svg class="motion-icon-pause h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
             </svg>
             <svg class="motion-icon-play h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M8 5v14l11-7z" />
             </svg>
-            <span id="motion-text" class="hidden font-pixel text-[0.55rem] xl:inline" aria-hidden="true">ANIM ON</span>
+            <span id="motion-text" class="hidden font-pixel text-[0.55rem] xl:inline" aria-hidden="true">{t.a11y.animOn}</span>
           </button>
 
           <!-- Tema -->
           <button id="theme-toggle" type="button" class="icon-btn" aria-pressed="true">
-            <span class="sr-only">Modo oscuro</span>
+            <span class="sr-only">{t.a11y.themeToggle}</span>
             <svg class="h-5 w-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
@@ -89,7 +127,7 @@
             aria-expanded="false"
             aria-controls="mobile-menu"
           >
-            <span class="sr-only">Abrir menú de navegación</span>
+            <span class="sr-only">{n.menuOpen}</span>
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
@@ -101,18 +139,17 @@
     <!-- Menú móvil -->
     <div id="mobile-menu" class="hidden border-t-2 border-game-blue/40 md:hidden">
       <div class="space-y-2 px-4 py-4">
-        <a href="#about" class="mobile-nav-link"><span aria-hidden="true">📖</span> SOBRE MI</a>
-        <a href="#skills" class="mobile-nav-link"><span aria-hidden="true">⚔️</span> HABILIDADES</a>
-        <a href="#experience" class="mobile-nav-link"><span aria-hidden="true">🎯</span> EXPERIENCIA</a>
-        <a href="#projects" class="mobile-nav-link"><span aria-hidden="true">🎮</span> PROYECTOS</a>
-        <a href="#achievements" class="mobile-nav-link"><span aria-hidden="true">🏆</span> LOGROS</a>
-        <a href="#contact" class="mobile-nav-link"><span aria-hidden="true">💬</span> CONTACTO</a>
+        {links.map((l) => (
+          <a href={`#${l.id}`} class="mobile-nav-link"><span aria-hidden="true">{l.icon}</span> {l.mLabel}</a>
+        ))}
       </div>
     </div>
   </div>
 </nav>
 
 <script>
+  import { t } from '../i18n/client';
+
   const hud = document.getElementById('hud');
   const bar = document.getElementById('scroll-progress-bar');
   const pct = document.getElementById('scroll-percentage');
@@ -121,6 +158,7 @@
   const menu = document.getElementById('mobile-menu');
   const links = document.querySelectorAll<HTMLAnchorElement>('.nav-link, .mobile-nav-link');
   const sections = document.querySelectorAll<HTMLElement>('section[id]');
+  const langSwitch = document.getElementById('lang-switch') as HTMLAnchorElement | null;
 
   let lastY = window.scrollY;
 
@@ -169,7 +207,7 @@
     toggle?.setAttribute('aria-expanded', String(open));
     menu?.classList.toggle('hidden', !open);
     const label = toggle?.querySelector('.sr-only');
-    if (label) label.textContent = open ? 'Cerrar menú de navegación' : 'Abrir menú de navegación';
+    if (label) label.textContent = open ? t.nav.menuClose : t.nav.menuOpen;
   }
 
   toggle?.addEventListener('click', () => {
@@ -181,6 +219,12 @@
       setMenu(false);
       toggle.focus();
     }
+  });
+
+  // Al cambiar de idioma, conserva la sección en la que estás
+  langSwitch?.addEventListener('click', () => {
+    const base = (langSwitch.getAttribute('href') || '/').split('#')[0];
+    langSwitch.setAttribute('href', base + window.location.hash);
   });
 
   updateProgress();

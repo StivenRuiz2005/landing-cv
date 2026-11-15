@@ -1,13 +1,18 @@
 ---
-import personalData from '../data/personal.json';
+import { ui, type Lang } from '../i18n/ui';
+import { getData } from '../i18n/data';
 
-// Clave pública de Web3Forms (opcional). Se crea gratis en https://web3forms.com
-// y se pone en un archivo .env como:  PUBLIC_WEB3FORMS_KEY=tu_clave
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+const c = t.contact;
+const { personal } = getData(lang);
+
 const formKey = import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '';
 
-const githubUser = personalData.github.split('/').filter(Boolean).pop();
-const gitlabUser = personalData.gitlab.split('/').filter(Boolean).pop();
-const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
+const githubUser = personal.github.split('/').filter(Boolean).pop();
+const gitlabUser = personal.gitlab.split('/').filter(Boolean).pop();
+const linkedinUser = personal.linkedin.split('/').filter(Boolean).pop();
 ---
 
 <section id="contact" class="section-container bg-game-dark-light/40" aria-labelledby="contact-heading">
@@ -15,106 +20,83 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
 
     <div class="reveal">
       <h2 id="contact-heading" class="heading-pixel mb-6">
-        <span aria-hidden="true">📨</span> NUEVA MISIÓN <span aria-hidden="true">📨</span>
+        <span aria-hidden="true">📨</span> {c.heading} <span aria-hidden="true">📨</span>
       </h2>
-      <p class="mx-auto mb-12 max-w-2xl text-center text-muted">
-        ¿Tienes una oferta, un proyecto o una idea? Escríbeme y te respondo lo antes posible.
-      </p>
+      <p class="mx-auto mb-12 max-w-2xl text-center text-muted">{c.intro}</p>
     </div>
 
     <div class="grid gap-8 lg:grid-cols-5">
 
       <!-- ============ CANALES ============ -->
       <div class="reveal space-y-4 lg:col-span-2">
-        <h3 class="font-pixel text-xs text-game-cyan">CANALES</h3>
+        <h3 class="font-pixel text-xs text-game-cyan">{c.channels}</h3>
 
         <!-- Correo -->
         <div class="channel glass-panel rounded-xl p-5">
-          <p class="mb-1 font-pixel text-[0.6rem] text-game-purple">CORREO</p>
-          <p class="mb-3 break-all font-semibold text-ink" id="email-text">{personalData.email}</p>
+          <p class="mb-1 font-pixel text-[0.6rem] text-game-purple">{c.emailLabel}</p>
+          <p class="mb-3 break-all font-semibold text-ink" id="email-text">{personal.email}</p>
 
           <div class="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              id="copy-email"
-              class="copy-btn"
-              data-email={personalData.email}
-            >
-              <span id="copy-label">Copiar correo</span>
+            <button type="button" id="copy-email" class="copy-btn" data-email={personal.email}>
+              <span id="copy-label">{c.copy}</span>
             </button>
             <a
-              href={`mailto:${personalData.email}`}
+              href={`mailto:${personal.email}`}
               class="inline-flex min-h-[44px] items-center text-sm font-semibold text-game-cyan underline underline-offset-4 hover:text-game-cyan-light"
             >
-              Abrir app de correo
+              {c.openMail}
             </a>
           </div>
         </div>
 
-        <!-- GitHub -->
+        <!-- CV -->
         <a
-          href={personalData.github}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={t.cvFile}
+          download={t.cvFile.slice(1)}
+          data-cv
           class="channel link-card glass-panel rounded-xl p-5"
         >
+          <span class="text-3xl" aria-hidden="true">📄</span>
+          <span class="flex-1">
+            <span class="block font-pixel text-[0.6rem] text-game-purple">{c.cvLabel}</span>
+            <span class="block font-semibold text-ink">{c.cvText}</span>
+          </span>
+          <span class="text-game-cyan" aria-hidden="true">↓</span>
+        </a>
+
+        <!-- GitHub -->
+        <a href={personal.github} target="_blank" rel="noopener noreferrer" class="channel link-card glass-panel rounded-xl p-5">
           <span class="text-3xl" aria-hidden="true">🐙</span>
           <span class="flex-1">
             <span class="block font-pixel text-[0.6rem] text-game-purple">GITHUB</span>
             <span class="block font-semibold text-ink">@{githubUser}</span>
           </span>
           <span class="text-game-cyan" aria-hidden="true">↗</span>
-          <span class="sr-only">(abre en una pestaña nueva)</span>
+          <span class="sr-only">{t.newTab}</span>
         </a>
 
         <!-- GitLab -->
-        <a
-          href={personalData.gitlab}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="channel link-card glass-panel rounded-xl p-5"
-        >
+        <a href={personal.gitlab} target="_blank" rel="noopener noreferrer" class="channel link-card glass-panel rounded-xl p-5">
           <span class="text-3xl" aria-hidden="true">🦊</span>
           <span class="flex-1">
             <span class="block font-pixel text-[0.6rem] text-game-purple">GITLAB</span>
             <span class="block font-semibold text-ink">@{gitlabUser}</span>
           </span>
           <span class="text-game-cyan" aria-hidden="true">↗</span>
-          <span class="sr-only">(abre en una pestaña nueva)</span>
+          <span class="sr-only">{t.newTab}</span>
         </a>
-        
+
         <!-- LinkedIn -->
-        <a
-        href={personalData.linkedin}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="channel link-card glass-panel rounded-xl p-5"
-        >
-        <span class="text-3xl" aria-hidden="true">💼</span>
-        <span class="flex-1">
+        <a href={personal.linkedin} target="_blank" rel="noopener noreferrer" class="channel link-card glass-panel rounded-xl p-5">
+          <span class="text-3xl" aria-hidden="true">💼</span>
+          <span class="flex-1">
             <span class="block font-pixel text-[0.6rem] text-game-purple">LINKEDIN</span>
             <span class="block font-semibold text-ink">{linkedinUser}</span>
-        </span>
-        <span class="text-game-cyan" aria-hidden="true">↗</span>
-        <span class="sr-only">(abre en una pestaña nueva)</span>
-        </a>
-
-        <a
-          href="/CV-Carlos-Ruiz.pdf"
-          download="CV-Carlos-Ruiz.pdf"
-          data-cv
-          class="channel link-card glass-panel rounded-xl p-5"
-        >
-          <span class="text-3xl" aria-hidden="true">📄</span>
-          <span class="flex-1">
-            <span class="block font-pixel text-[0.6rem] text-game-purple">HOJA DE VIDA</span>
-            <span class="block font-semibold text-ink">Descargar CV (PDF)</span>
           </span>
-          <span class="text-game-cyan" aria-hidden="true">↓</span>
+          <span class="text-game-cyan" aria-hidden="true">↗</span>
+          <span class="sr-only">{t.newTab}</span>
         </a>
       </div>
-
-
 
       <!-- ============ FORMULARIO ============ -->
       <div class="reveal lg:col-span-3">
@@ -123,60 +105,38 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
           class="glass-panel space-y-5 rounded-xl p-6 sm:p-8"
           novalidate
           data-key={formKey}
-          data-to={personalData.email}
+          data-to={personal.email}
           aria-labelledby="form-title"
         >
-          <h3 id="form-title" class="font-pixel text-xs text-game-cyan">ENVIAR MENSAJE</h3>
+          <h3 id="form-title" class="font-pixel text-xs text-game-cyan">{c.formTitle}</h3>
 
-          <!-- Anti-spam: los humanos no ven este campo -->
           <div class="hp" aria-hidden="true">
-            <label>No llenar<input type="text" name="botcheck" tabindex="-1" autocomplete="off" /></label>
+            <label>{c.honeypot}<input type="text" name="botcheck" tabindex="-1" autocomplete="off" /></label>
           </div>
 
           <div class="field">
-            <label for="f-name">Nombre</label>
-            <input
-              id="f-name"
-              name="name"
-              type="text"
-              autocomplete="name"
-              required
-              aria-describedby="err-name"
-            />
+            <label for="f-name">{c.name}</label>
+            <input id="f-name" name="name" type="text" autocomplete="name" required aria-describedby="err-name" />
             <p id="err-name" class="err" role="alert"></p>
           </div>
 
           <div class="field">
-            <label for="f-email">Tu correo</label>
-            <input
-              id="f-email"
-              name="email"
-              type="email"
-              autocomplete="email"
-              inputmode="email"
-              required
-              aria-describedby="err-email"
-            />
+            <label for="f-email">{c.yourEmail}</label>
+            <input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" required aria-describedby="err-email" />
             <p id="err-email" class="err" role="alert"></p>
           </div>
 
           <div class="field">
-            <label for="f-message">Mensaje</label>
-            <textarea
-              id="f-message"
-              name="message"
-              rows="5"
-              required
-              aria-describedby="err-message hint-message"
-            ></textarea>
-            <p id="hint-message" class="hint">Mínimo 10 caracteres.</p>
+            <label for="f-message">{c.message}</label>
+            <textarea id="f-message" name="message" rows="5" required aria-describedby="err-message hint-message"></textarea>
+            <p id="hint-message" class="hint">{c.hint}</p>
             <p id="err-message" class="err" role="alert"></p>
           </div>
 
           <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
             <button type="submit" id="send-btn" class="btn-pixel">
               <span aria-hidden="true">▶</span>
-              <span id="send-label">ENVIAR MENSAJE</span>
+              <span id="send-label">{c.send}</span>
             </button>
             <p id="form-status" class="text-sm font-semibold" role="status" aria-live="polite"></p>
           </div>
@@ -187,9 +147,7 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
 </section>
 
 <style>
-  .channel {
-    display: block;
-  }
+  .channel { display: block; }
 
   .link-card {
     display: flex;
@@ -198,10 +156,7 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
     text-decoration: none;
     transition: transform 0.2s ease, border-color 0.2s ease;
   }
-  .link-card:hover {
-    transform: translateX(4px);
-    border-color: var(--accent);
-  }
+  .link-card:hover { transform: translateX(4px); border-color: var(--accent); }
 
   .copy-btn {
     min-height: 44px;
@@ -215,16 +170,9 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
     cursor: pointer;
     transition: background 0.2s ease;
   }
-  .copy-btn:hover {
-    background: color-mix(in srgb, var(--accent) 22%, transparent);
-  }
-  .copy-btn.ok {
-    color: var(--btn-text);
-    background: var(--btn);
-    border-color: var(--btn);
-  }
+  .copy-btn:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+  .copy-btn.ok { color: var(--btn-text); background: var(--btn); border-color: var(--btn); }
 
-  /* Campos */
   .field label {
     display: block;
     margin-bottom: 0.4rem;
@@ -252,27 +200,14 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
   }
   .field input[aria-invalid="true"],
-  .field textarea[aria-invalid="true"] {
-    border-color: #ef4444;
-  }
+  .field textarea[aria-invalid="true"] { border-color: #ef4444; }
 
   .hint { margin-top: 0.3rem; font-size: 0.8rem; color: var(--muted); }
-  .err {
-    margin-top: 0.3rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #dc2626;
-  }
+  .err { margin-top: 0.3rem; font-size: 0.85rem; font-weight: 600; color: #dc2626; }
   :global(.dark) .err { color: #fca5a5; }
   .err:empty { display: none; }
 
-  .hp {
-    position: absolute;
-    left: -9999px;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-  }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
   #send-btn:disabled { opacity: 0.6; cursor: wait; }
   #form-status.ok { color: var(--accent); }
@@ -281,6 +216,10 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
 </style>
 
 <script>
+  import { t, fmt } from '../i18n/client';
+
+  const c = t.contact;
+
   const live = (msg: string) => {
     const el = document.getElementById('live-region');
     if (el) el.textContent = msg;
@@ -295,7 +234,6 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
     try {
       await navigator.clipboard.writeText(email);
     } catch {
-      // Respaldo para navegadores sin permiso de portapapeles
       const range = document.createRange();
       range.selectNodeContents(document.getElementById('email-text')!);
       const sel = window.getSelection();
@@ -304,11 +242,11 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
       document.execCommand('copy');
       sel?.removeAllRanges();
     }
-    if (copyLabel) copyLabel.textContent = '¡Copiado!';
+    if (copyLabel) copyLabel.textContent = c.copied;
     copyBtn.classList.add('ok');
-    live('Correo copiado al portapapeles');
+    live(c.copiedLive);
     setTimeout(() => {
-      if (copyLabel) copyLabel.textContent = 'Copiar correo';
+      if (copyLabel) copyLabel.textContent = c.copy;
       copyBtn.classList.remove('ok');
     }, 2200);
   });
@@ -328,14 +266,14 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
     };
 
     const validators: Record<keyof typeof fields, (v: string) => string> = {
-      name: (v) => (v.trim().length < 2 ? 'Escribe tu nombre.' : ''),
+      name: (v) => (v.trim().length < 2 ? c.errName : ''),
       email: (v) =>
         !v.trim()
-          ? 'Escribe tu correo.'
+          ? c.errEmailEmpty
           : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())
-          ? 'Revisa el correo: debe verse como nombre@dominio.com'
+          ? c.errEmailFormat
           : '',
-      message: (v) => (v.trim().length < 10 ? 'El mensaje debe tener al menos 10 caracteres.' : ''),
+      message: (v) => (v.trim().length < 10 ? c.errMessage : ''),
     };
 
     function check(key: keyof typeof fields): boolean {
@@ -370,9 +308,8 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
         return;
       }
 
-      // Si un bot llenó el campo oculto, fingimos éxito y no enviamos
       const bot = (form.elements.namedItem('botcheck') as HTMLInputElement).value;
-      if (bot) { setStatus('¡Mensaje enviado!', 'ok'); return; }
+      if (bot) { setStatus(c.sent, 'ok'); return; }
 
       const payload = {
         name: fields.name.value.trim(),
@@ -381,19 +318,19 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
       };
       const key = form.dataset.key;
       const to = form.dataset.to ?? '';
+      const subjectText = fmt(c.subject, { name: payload.name });
 
       sendBtn.disabled = true;
-      sendLabel.textContent = 'ENVIANDO...';
+      sendLabel.textContent = c.sending;
 
-      // Sin clave configurada: abrimos el correo con el mensaje ya redactado
       if (!key) {
-        const subject = encodeURIComponent(`Contacto desde tu portafolio – ${payload.name}`);
+        const subject = encodeURIComponent(subjectText);
         const body = encodeURIComponent(`${payload.message}\n\n— ${payload.name} (${payload.email})`);
         window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
-        setStatus('Se abrió tu app de correo con el mensaje listo para enviar.', 'ok');
-        live('Se abrió tu app de correo con el mensaje listo');
+        setStatus(c.mailOpened, 'ok');
+        live(c.mailOpenedLive);
         sendBtn.disabled = false;
-        sendLabel.textContent = 'ENVIAR MENSAJE';
+        sendLabel.textContent = c.send;
         return;
       }
 
@@ -403,8 +340,8 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify({
             access_key: key,
-            subject: `Contacto desde tu portafolio – ${payload.name}`,
-            from_name: 'Portafolio',
+            subject: subjectText,
+            from_name: 'Portfolio',
             ...payload,
           }),
         });
@@ -415,15 +352,15 @@ const linkedinUser = personalData.linkedin.split('/').filter(Boolean).pop();
         (Object.keys(fields) as (keyof typeof fields)[]).forEach((k) =>
           fields[k].setAttribute('aria-invalid', 'false')
         );
-        setStatus('¡Mensaje enviado! Te responderé pronto.', 'ok');
+        setStatus(c.sent, 'ok');
         window.dispatchEvent(new CustomEvent('game:award', {
-          detail: { id: 'message', xp: 200, label: '📨 Misión aceptada: mensaje enviado' },
+          detail: { id: 'message', xp: 200, label: t.game.message },
         }));
       } catch {
-        setStatus('No se pudo enviar. Escríbeme directamente al correo.', 'bad');
+        setStatus(c.failed, 'bad');
       } finally {
         sendBtn.disabled = false;
-        sendLabel.textContent = 'ENVIAR MENSAJE';
+        sendLabel.textContent = c.send;
       }
     });
   }
