@@ -1,0 +1,236 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Ingeniero de Sistemas | Full Stack Developer especializado en Backend, APIs REST y análisis de datos.',
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const socialImageURL = new URL('/og-image.png', Astro.site);
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="author" content="Carlos Stiven Ruiz Rojas" />
+    <meta name="keywords" content="Full Stack Developer, Backend Developer, Node.js, NestJS, Angular, TypeScript, Python, AWS, Ingeniero de Sistemas" />
+
+    <link rel="canonical" href={canonicalURL} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={socialImageURL} />
+    <meta property="og:locale" content="es_CO" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImageURL} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#2563EB" />
+
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    />
+
+    <!-- Aplica tema y preferencia de movimiento ANTES de pintar (sin parpadeo) -->
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        root.classList.add('js');
+        try {
+          var stored = localStorage.getItem('theme');
+          var dark = stored
+            ? stored === 'dark'
+            : !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+          root.classList.toggle('dark', dark);
+          if (localStorage.getItem('motion') === 'off') root.classList.add('no-motion');
+        } catch (e) {
+          root.classList.add('dark');
+        }
+      })();
+    </script>
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      name: 'Carlos Stiven Ruiz Rojas',
+      url: Astro.site?.toString(),
+      jobTitle: 'Full Stack Developer',
+      description: 'Ingeniero de Sistemas especializado en desarrollo Full Stack y Backend',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Tuluá',
+        addressRegion: 'Valle del Cauca',
+        addressCountry: 'Colombia',
+      },
+      alumniOf: { '@type': 'CollegeOrUniversity', name: 'Universidad del Valle' },
+      knowsAbout: ['JavaScript', 'TypeScript', 'Node.js', 'NestJS', 'Angular', 'React', 'Python', 'AWS', 'Docker', 'PostgreSQL'],
+      sameAs: ['https://github.com/StivenRuiz2005', 'https://gitlab.com/carlosruizrojas2005', 'https://www.linkedin.com/in/stiven-ruiz',],
+    })} />
+
+    <title>{title}</title>
+  </head>
+
+  <body class="relative min-h-screen overflow-x-hidden">
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <!-- Fondo decorativo -->
+    <div class="fixed inset-0 -z-20 overflow-hidden" aria-hidden="true">
+      <div class="absolute inset-0 bg-gradient-to-br from-game-dark via-game-dark-light to-game-dark"></div>
+      <div class="retro-grid opacity-40"></div>
+      <div class="stars"></div>
+      <div class="absolute top-0 left-1/4 h-96 w-96 rounded-full bg-game-blue/20 blur-3xl"></div>
+      <div class="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-game-purple/15 blur-3xl"></div>
+    </div>
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <div id="live-region" class="sr-only" role="status" aria-live="polite"></div>
+
+    <script>
+      const root = document.documentElement;
+
+      function announce(msg: string) {
+        const el = document.getElementById('live-region');
+        if (el) el.textContent = msg;
+      }
+
+      /* ---------- Tema ---------- */
+      const themeBtn = document.getElementById('theme-toggle');
+      themeBtn?.setAttribute('aria-pressed', String(root.classList.contains('dark')));
+      themeBtn?.addEventListener('click', () => {
+        const dark = root.classList.toggle('dark');
+        themeBtn.setAttribute('aria-pressed', String(dark));
+        try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch {}
+        announce(dark ? 'Modo oscuro activado' : 'Modo claro activado');
+      });
+
+      /* ---------- Pausar animaciones ---------- */
+      const motionBtn = document.getElementById('motion-toggle') as HTMLButtonElement | null;
+      const motionLabel = motionBtn?.querySelector('.sr-only');
+      const motionText = document.getElementById('motion-text');
+      const osReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function syncMotion() {
+        if (!motionBtn) return;
+
+        // Si el sistema pide menos movimiento, no se puede reactivar desde aquí
+        if (osReduce) {
+          root.classList.add('no-motion');
+          motionBtn.disabled = true;
+          const msg = 'Animaciones desactivadas por la configuración de tu sistema';
+          motionBtn.title = msg;
+          if (motionLabel) motionLabel.textContent = msg;
+          if (motionText) motionText.textContent = 'SISTEMA';
+          return;
+        }
+
+        const paused = root.classList.contains('no-motion');
+        const label = paused ? 'Reanudar animaciones' : 'Pausar animaciones';
+        motionBtn.title = label;
+        if (motionLabel) motionLabel.textContent = label;
+        if (motionText) motionText.textContent = paused ? 'ANIM OFF' : 'ANIM ON';
+      }
+
+      syncMotion();
+
+      motionBtn?.addEventListener('click', () => {
+        const paused = root.classList.toggle('no-motion');
+        try { localStorage.setItem('motion', paused ? 'off' : 'on'); } catch {}
+        syncMotion();
+        announce(paused ? 'Animaciones pausadas' : 'Animaciones activadas');
+      });
+
+      /* ---------- Reveal al hacer scroll ---------- */
+      const items = document.querySelectorAll<HTMLElement>('.reveal');
+      if (osReduce || !('IntersectionObserver' in window)) {
+        items.forEach((el) => el.classList.add('visible'));
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.12 }
+        );
+        items.forEach((el) => io.observe(el));
+      }
+
+      /* ---------- Konami Code ---------- */
+      const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+      let idx = 0;
+      document.addEventListener('keydown', (e) => {
+        if (e.key === konami[idx]) {
+          idx++;
+          if (idx === konami.length) {
+            idx = 0;
+            activateEasterEgg();
+          }
+        } else {
+          idx = e.key === konami[0] ? 1 : 0;
+        }
+      });
+
+      function activateEasterEgg() {
+        window.dispatchEvent(new CustomEvent('game:award', {
+          detail: { id: 'konami', xp: 500, label: '🏆 Código Konami descubierto' },
+        }));
+
+        announce('Logro desbloqueado: Master of Secrets');
+        const animate = !root.classList.contains('no-motion') && !osReduce;
+
+        if (animate) {
+          const colors = ['#22D3EE', '#8B5CF6', '#3B82F6', '#F59E0B'];
+          for (let i = 0; i < 50; i++) {
+            setTimeout(() => {
+              const px = document.createElement('div');
+              px.setAttribute('aria-hidden', 'true');
+              px.style.cssText = `position:fixed;width:12px;height:12px;background:${colors[Math.floor(Math.random() * colors.length)]};left:${Math.random() * 100}vw;top:-20px;z-index:9999;pointer-events:none;border-radius:2px;`;
+              const duration = 2000 + Math.random() * 3000;
+              px.animate(
+                [
+                  { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                  { transform: `translateY(100vh) rotate(${Math.random() * 360}deg)`, opacity: 0 },
+                ],
+                { duration, easing: 'ease-in' }
+              );
+              document.body.appendChild(px);
+              setTimeout(() => px.remove(), duration);
+            }, i * 50);
+          }
+        }
+
+        const box = document.createElement('div');
+        box.setAttribute('aria-hidden', 'true');
+        box.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10000;background:rgba(10,20,64,.95);border:4px solid #22D3EE;padding:2rem;border-radius:1rem;text-align:center;font-family:'Press Start 2P',cursive;color:#22D3EE;box-shadow:0 0 40px rgba(34,211,238,.6);`;
+        box.innerHTML = `<div style="font-size:2rem;margin-bottom:1rem">🏆</div><div style="font-size:.8rem;margin-bottom:.5rem">¡LOGRO DESBLOQUEADO!</div><div style="font-size:.6rem;color:#67E8F9">MASTER OF SECRETS</div>`;
+        document.body.appendChild(box);
+        setTimeout(() => box.remove(), 3000);
+      }
+    </script>
+  </body>
+</html>

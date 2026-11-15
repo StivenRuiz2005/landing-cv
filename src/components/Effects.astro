@@ -1,0 +1,156 @@
+---
+// Efectos interactivos: typewriter, spotlight, cursor crosshair y títulos decodificados.
+// Todos respetan prefers-reduced-motion y el botón de pausa.
+---
+
+<script>
+  const root = document.documentElement;
+  const osReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const motionOff = () => osReduce || root.classList.contains('no-motion');
+  const hasMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  /* ---------- 1. TYPEWRITER ---------- */
+  const tw = document.getElementById('typewriter');
+  if (tw) {
+    let roles: string[] = [];
+    try { roles = JSON.parse(tw.dataset.roles || '[]'); } catch {}
+
+    if (roles.length > 1) {
+      let r = 0;
+      let i = roles[0].length;
+      let deleting = false;
+
+      const tick = () => {
+        if (motionOff()) {
+          tw.textContent = roles[0];
+          r = 0;
+          i = roles[0].length;
+          deleting = false;
+          setTimeout(tick, 800);
+          return;
+        }
+
+        const full = roles[r];
+        i += deleting ? -1 : 1;
+        tw.textContent = full.slice(0, i);
+
+        let delay = deleting ? 40 : 85;
+        if (!deleting && i === full.length) { deleting = true; delay = 1800; }
+        else if (deleting && i === 0) { deleting = false; r = (r + 1) % roles.length; delay = 350; }
+        setTimeout(tick, delay);
+      };
+      setTimeout(tick, 2200);
+    }
+  }
+
+  /* ---------- 2. SPOTLIGHT EN PANELES ---------- */
+  if (hasMouse) {
+    document.querySelectorAll<HTMLElement>('.glass-panel').forEach((p) => {
+      p.addEventListener('pointermove', (e) => {
+        if (motionOff()) return;
+        const r = p.getBoundingClientRect();
+        p.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        p.style.setProperty('--my', `${e.clientY - r.top}px`);
+        p.classList.add('lit');
+      });
+      p.addEventListener('pointerleave', () => p.classList.remove('lit'));
+    });
+  }
+
+  /* ---------- 3. CURSOR CROSSHAIR + ESTELA ---------- */
+  if (hasMouse && !osReduce) {
+    const ring = document.createElement('div');
+    ring.className = 'xhair';
+    ring.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(ring);
+
+    let x = 0, y = 0, rx = 0, ry = 0, last = 0;
+
+    window.addEventListener('pointermove', (e) => {
+      x = e.clientX;
+      y = e.clientY;
+      ring.classList.add('on');
+      if (motionOff()) return;
+
+      const now = performance.now();
+      if (now - last > 45) {
+        last = now;
+        const px = document.createElement('div');
+        px.className = 'trail-px';
+        px.setAttribute('aria-hidden', 'true');
+        px.style.left = `${x - 3}px`;
+        px.style.top = `${y - 3}px`;
+        document.body.appendChild(px);
+        const a = px.animate(
+          [{ opacity: 0.7, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(0.2)' }],
+          { duration: 500, easing: 'ease-out' }
+        );
+        a.onfinish = () => px.remove();
+      }
+    });
+
+    document.addEventListener('pointerover', (e) => {
+      const hot = (e.target as HTMLElement).closest('a, button, [role="button"], input, textarea');
+      ring.classList.toggle('hot', !!hot);
+    });
+    document.addEventListener('mouseleave', () => ring.classList.remove('on'));
+
+    const loop = () => {
+      rx += (x - rx) * 0.22;
+      ry += (y - ry) * 0.22;
+      ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  }
+
+  /* ---------- 4. TÍTULOS "DECODIFICADOS" ---------- */
+  const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&@';
+
+  function scramble(node: Text) {
+    const original = node.textContent || '';
+    const duration = 700;
+    const start = performance.now();
+
+    const step = (now: number) => {
+      const p = Math.min((now - start) / duration, 1);
+      const reveal = Math.floor(original.length * p);
+      let out = '';
+      for (let i = 0; i < original.length; i++) {
+        const ch = original[i];
+        out += i < reveal || ch === ' ' ? ch : CHARS[Math.floor(Math.random() * CHARS.length)];
+      }
+      node.textContent = out;
+      if (p < 1) requestAnimationFrame(step);
+      else node.textContent = original;
+    };
+    requestAnimationFrame(step);
+  }
+
+  if (!osReduce && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const h = entry.target as HTMLElement;
+          io.unobserve(h);
+          if (motionOff()) return;
+
+          // Nombre accesible fijo, para que el lector no lea letras aleatorias
+          const clean = Array.from(h.childNodes)
+            .filter((n) => n.nodeType === 3)
+            .map((n) => (n.textContent || '').trim())
+            .join(' ')
+            .trim();
+          if (clean) h.setAttribute('aria-label', clean);
+
+          h.childNodes.forEach((n) => {
+            if (n.nodeType === 3 && (n.textContent || '').trim()) scramble(n as Text);
+          });
+        });
+      },
+      { threshold: 0.8 }
+    );
+    document.querySelectorAll('h2.heading-pixel').forEach((h) => io.observe(h));
+  }
+</script>

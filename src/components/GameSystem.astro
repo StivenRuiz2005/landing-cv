@@ -1,0 +1,210 @@
+---
+// Sistema de XP y niveles. Los avisos se agrupan y salen de uno en uno,
+// solo cuando el usuario se detiene a mirar.
+---
+
+<div
+  id="toasts"
+  class="pointer-events-none fixed bottom-4 right-4 z-[60] flex w-[min(20rem,calc(100vw-2rem))] flex-col items-end gap-3"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+></div>
+
+<style>
+  :global(.toast) {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 3px solid var(--accent);
+    box-shadow: 4px 4px 0 var(--shadow-hard), var(--glow);
+    animation: toast-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  :global(.toast.levelup) {
+    border-color: var(--purple);
+  }
+  :global(.toast .t-title) {
+    font-family: var(--font-pixel);
+    font-size: 0.6rem;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+  :global(.toast.levelup .t-title) { color: var(--purple); }
+  :global(.toast .t-body) { font-size: 0.8rem; color: var(--muted); }
+  :global(.toast.out) {
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateX(40px); }
+  }
+</style>
+
+<script>
+  const KEY = 'game';
+  const XP_PER_SECTION = 150;
+  const QUIET_MS = 1200;      // espera sin hacer scroll antes de mostrar un aviso
+  const WARMUP_MS = 4000;     // sin avisos durante los primeros segundos
+  const SHOW_MS = 3000;       // cuánto dura cada aviso
+
+  const SECTIONS: Record<string, string> = {
+    about: 'ABOUT ME',
+    skills: 'SKILL TREE',
+    experience: 'QUEST LOG',
+    projects: 'PROJECTS',
+    achievements: 'ACHIEVEMENTS',
+    contact: 'NUEVA MISIÓN',
+  };
+
+  type State = { xp: number; seen: string[] };
+  let state: State = { xp: 0, seen: [] };
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) state = JSON.parse(raw);
+  } catch {}
+
+  const levelOf = (xp: number) => 1 + Math.floor(xp / 100);
+  const startedAt = performance.now();
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+  }
+
+  function render() {
+    document.querySelectorAll<HTMLElement>('[data-level]').forEach((el) => {
+      el.textContent = String(levelOf(state.xp));
+    });
+    document.querySelectorAll<HTMLElement>('[data-xp]').forEach((el) => {
+      el.textContent = String(state.xp);
+    });
+  }
+
+  /* ---------- Cola de avisos ---------- */
+  type Toast = { title: string; body: string; levelup?: boolean };
+  const queue: Toast[] = [];
+  let showing = false;
+  let lastScroll = 0;
+
+  window.addEventListener('scroll', () => { lastScroll = performance.now(); }, { passive: true });
+
+  const canShow = () =>
+    performance.now() - startedAt > WARMUP_MS &&
+    performance.now() - lastScroll > QUIET_MS;
+
+  function pump() {
+    if (showing || queue.length === 0) return;
+    if (!canShow()) {
+      setTimeout(pump, 400);
+      return;
+    }
+    showing = true;
+    const t = queue.shift()!;
+    const box = document.getElementById('toasts');
+    if (!box) { showing = false; return; }
+
+    const el = document.createElement('div');
+    el.className = `toast${t.levelup ? ' levelup' : ''}`;
+    const title = document.createElement('p');
+    title.className = 't-title';
+    title.textContent = t.title;
+    const body = document.createElement('p');
+    body.className = 't-body';
+    body.textContent = t.body;
+    el.append(title, body);
+    box.replaceChildren(el);
+
+    const close = () => {
+      el.classList.add('out');
+      setTimeout(() => {
+        el.remove();
+        showing = false;
+        setTimeout(pump, 300);
+      }, 260);
+    };
+    const timer = setTimeout(close, SHOW_MS);
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        clearTimeout(timer);
+        document.removeEventListener('keydown', onKey);
+        close();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    setTimeout(() => document.removeEventListener('keydown', onKey), SHOW_MS + 100);
+  }
+
+  function notify(t: Toast) {
+    queue.push(t);
+    pump();
+  }
+
+  /* ---------- Otorgar XP (agrupa lo que llega junto) ---------- */
+  let pending: { xp: number; labels: string[] } = { xp: 0, labels: [] };
+  let flushTimer: number | undefined;
+
+  function flush() {
+    const { xp, labels } = pending;
+    pending = { xp: 0, labels: [] };
+    if (xp === 0) return;
+
+    const before = levelOf(state.xp - xp);
+    const after = levelOf(state.xp);
+
+    const body =
+      labels.length === 1
+        ? labels[0]
+        : `Descubriste ${labels.length} secciones`;
+    notify({ title: `+${xp} XP`, body });
+
+    if (after > before) {
+      notify({ title: '¡LEVEL UP!', body: `Ahora eres nivel ${after}`, levelup: true });
+    }
+  }
+
+  function award(id: string, xp: number, label: string) {
+    if (state.seen.includes(id)) return;
+    state.seen.push(id);
+    state.xp += xp;
+    save();
+    render();
+
+    pending.xp += xp;
+    pending.labels.push(label);
+    clearTimeout(flushTimer);
+    flushTimer = window.setTimeout(flush, 700);
+
+    const all = Object.keys(SECTIONS).every((s) => state.seen.includes(s));
+    if (all && !state.seen.includes('explorer')) {
+      setTimeout(() => award('explorer', 100, '🏆 Explorador completo'), 1500);
+    }
+  }
+
+  render();
+
+  /* ---------- Descubrir secciones ---------- */
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const id = entry.target.id;
+        io.unobserve(entry.target);
+        award(id, XP_PER_SECTION, `Descubriste ${SECTIONS[id]}`);
+      });
+    },
+    { threshold: 0.5 }
+  );
+  Object.keys(SECTIONS).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) io.observe(el);
+  });
+
+  /* ---------- Eventos externos (Konami, mensaje enviado) ---------- */
+  window.addEventListener('game:award', (e) => {
+    const d = (e as CustomEvent).detail;
+    award(d.id, d.xp, d.label);
+  });
+</script>

@@ -1,0 +1,182 @@
+---
+import personalData from '../data/personal.json';
+import HeroBackdrop from './HeroBackdrop.astro';
+---
+
+<section
+  id="hero"
+  class="relative flex min-h-screen items-center justify-center overflow-hidden px-4 pt-24 pb-24"
+  aria-labelledby="hero-title"
+>
+  <HeroBackdrop />
+
+  <!-- Partículas -->
+  <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+    <div class="particle particle-1"></div>
+    <div class="particle particle-2"></div>
+    <div class="particle particle-3"></div>
+  </div>
+
+  <div class="relative z-10 mx-auto max-w-5xl space-y-8 text-center">
+
+    <!-- Título -->
+    <div class="hero-fade space-y-4">
+      <p class="font-pixel text-xs uppercase tracking-widest text-game-cyan sm:text-sm">
+        <span aria-hidden="true">←</span> Sesión iniciada <span aria-hidden="true">→</span>
+      </p>
+
+      <h1
+        id="hero-title"
+        data-text={personalData.name.toUpperCase()}
+        class="glitch title-glow break-words px-2 font-pixel text-2xl leading-tight sm:text-4xl md:text-5xl lg:text-6xl"
+      >
+        {personalData.name.toUpperCase()}
+      </h1>
+    </div>
+
+    <!-- Panel de personaje -->
+    <div class="glass-panel mx-auto max-w-3xl rounded-2xl border-4 p-6 sm:p-8">
+
+      <div class="mb-6 space-y-3">
+        <p class="font-display text-lg text-ink sm:text-xl md:text-2xl">
+          <span class="font-pixel text-sm text-game-purple">CLASS:</span>
+          <span class="sr-only">{personalData.title}</span>
+          <span class="ml-3 font-bold text-game-cyan" aria-hidden="true">
+            <span
+              id="typewriter"
+              data-roles={JSON.stringify([
+                personalData.title,
+                'Backend Specialist',
+                'Data Analyst',
+                'Cloud Learner',
+              ])}
+            >{personalData.title}</span><span class="caret"></span>
+          </span>
+        </p>
+        <p class="text-sm leading-relaxed text-muted sm:text-base md:text-lg">
+          {personalData.subtitle}
+        </p>
+      </div>
+
+      <!-- Stats -->
+      <dl class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+        <div class="stat-box">
+          <dt class="mb-1 font-pixel text-xs text-game-cyan">LEVEL</dt>
+          <dd class="text-2xl font-bold text-ink" data-level>1</dd>
+        </div>
+        <div class="stat-box">
+          <dt class="mb-1 font-pixel text-xs text-game-purple">EXP</dt>
+          <dd class="text-2xl font-bold text-ink">1+ año</dd>
+        </div>
+        <div class="stat-box col-span-2 sm:col-span-1">
+          <dt class="mb-1 font-pixel text-xs text-game-blue">LOCATION</dt>
+          <dd class="text-sm font-semibold text-ink">Tuluá, COL</dd>
+        </div>
+      </dl>
+
+      <!-- Barra de skills -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between font-pixel text-xs">
+          <span class="text-game-cyan">SKILLS</span>
+          <span class="text-ink">15+ TECH</span>
+        </div>
+        <div
+          class="h-4 overflow-hidden border-2 border-game-blue/60 bg-game-dark-light"
+          role="img"
+          aria-label="Dominio de habilidades: 85%"
+        >
+          <div
+            class="fill-bar h-full bg-gradient-to-r from-game-blue via-game-cyan to-game-purple"
+            style="--fill-width: 85%"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTAs -->
+    <div class="flex flex-col items-center justify-center gap-4 px-4 sm:flex-row sm:gap-6">
+      <a href="#about" class="btn-pixel w-full sm:w-auto">
+        <span class="blink" aria-hidden="true">▶</span>
+        <span>PRESS START</span>
+      </a>
+      <a href="#contact" class="btn-secondary w-full sm:w-auto">
+        <span aria-hidden="true">💬</span>
+        <span>CONTACTAR</span>
+      </a>
+    </div>
+
+    <p class="flex items-center justify-center gap-2 text-sm text-muted">
+      <span aria-hidden="true">📍</span>
+      <span>{personalData.location}</span>
+    </p>
+  </div>
+
+  <!-- Indicador de scroll -->
+  <div class="pointer-events-none absolute bottom-8 left-0 right-0 flex justify-center" aria-hidden="true">
+    <div class="float flex flex-col items-center gap-2">
+      <div class="flex h-10 w-6 items-start justify-center rounded-full border-2 border-game-blue p-2">
+        <div class="h-3 w-1.5 rounded-full bg-game-cyan"></div>
+      </div>
+      <p class="font-pixel text-xs text-game-blue">SCROLL</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stat-box {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--blue) 10%, transparent);
+    border: 2px solid var(--border);
+    transition: transform 0.3s ease, background 0.3s ease;
+  }
+  .stat-box:hover {
+    background: color-mix(in srgb, var(--blue) 20%, transparent);
+    transform: translateY(-2px);
+  }
+
+  .particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.6;
+    animation: float-particle 15s infinite;
+  }
+  .particle-1 { top: 20%; left: 10%; animation-duration: 12s; }
+  .particle-2 { top: 60%; right: 15%; animation-duration: 18s; animation-delay: 4s; }
+  .particle-3 { bottom: 30%; left: 70%; animation-duration: 15s; animation-delay: 8s; }
+
+  @keyframes float-particle {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+    25% { transform: translate(50px, -50px) scale(1.2); opacity: 0.6; }
+    50% { transform: translate(100px, -20px) scale(0.8); opacity: 0.4; }
+    75% { transform: translate(50px, 30px) scale(1.1); opacity: 0.5; }
+  }
+
+  .hero-fade { animation: hero-fade 1s ease-out both; }
+  @keyframes hero-fade {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Parpadeo lento (1 vez por segundo, seguro para fotosensibilidad) */
+  .blink { animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .float { animation: float 3s ease-in-out infinite; }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .fill-bar {
+    width: 0;
+    animation: fill-bar 2s ease-out 0.5s forwards;
+  }
+  @keyframes fill-bar {
+    from { width: 0; }
+    to { width: var(--fill-width); }
+  }
+</style>

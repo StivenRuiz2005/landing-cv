@@ -1,0 +1,92 @@
+[
+  {
+    "name": "JavaScript",
+    "level": 95,
+    "category": "frontend",
+    "xp": 9500
+  },
+  {
+    "name": "TypeScript",
+    "level": 95,
+    "category": "frontend",
+    "xp": 9500
+  },
+  {
+    "name": "Angular",
+    "level": 90,
+    "category": "frontend",
+    "xp": 9000
+  },
+  {
+    "name": "React/Next.js",
+    "level": 75,
+    "category": "frontend",
+    "xp": 7500
+  },
+  {
+    "name": "Node.js",
+    "level": 90,
+    "category": "backend",
+    "xp": 9000
+  },
+  {
+    "name": "NestJS",
+    "level": 90,
+    "category": "backend",
+    "xp": 9000
+  },
+  {
+    "name": "Python",
+    "level": 75,
+    "category": "backend",
+    "xp": 7500
+  },
+  {
+    "name": "FastAPI",
+    "level": 70,
+    "category": "backend",
+    "xp": 7000
+  },
+  {
+    "name": "Java/Spring Boot",
+    "level": 70,
+    "category": "backend",
+    "xp": 7000
+  },
+  {
+    "name": "PostgreSQL",
+    "level": 85,
+    "category": "database",
+    "xp": 8500
+  },
+  {
+    "name": "MongoDB",
+    "level": 70,
+    "category": "database",
+    "xp": 7000
+  },
+  {
+    "name": "Docker",
+    "level": 75,
+    "category": "devops",
+    "xp": 7500
+  },
+  {
+    "name": "Kubernetes",
+    "level": 60,
+    "category": "devops",
+    "xp": 6000
+  },
+  {
+    "name": "AWS",
+    "level": 65,
+    "category": "cloud",
+    "xp": 6500
+  },
+  {
+    "name": "Git/GitHub",
+    "level": 85,
+    "category": "tools",
+    "xp": 8500
+  }
+]

@@ -1,0 +1,131 @@
+---
+import projects from '../data/projects.json';
+---
+
+<section id="projects" class="section-container bg-game-dark-light/40" aria-labelledby="projects-heading">
+  <div class="mx-auto max-w-6xl">
+    <div class="reveal">
+      <h2 id="projects-heading" class="heading-pixel mb-6">
+        <span aria-hidden="true">🎮</span> PROYECTOS <span aria-hidden="true">🎮</span>
+      </h2>
+      <p class="mx-auto mb-12 max-w-2xl text-center text-muted">
+        Cada proyecto es un cartucho. Pasa el cursor por encima para inclinarlo.
+      </p>
+    </div>
+
+    <ul class="grid grid-cols-1 gap-8 md:grid-cols-2" role="list">
+      {projects.map((p, i) => (
+        <li class="reveal">
+          <article class="cartridge" aria-labelledby={`proj-${p.id}`}>
+            <div class="cartridge-label">
+              <span class="font-pixel text-[0.6rem]">CARTUCHO {String(i + 1).padStart(2, '0')}</span>
+              <span class="font-pixel text-[0.55rem] opacity-90">{p.kind}</span>
+            </div>
+
+            <div class="cartridge-body">
+              <div class="mb-3 text-4xl" aria-hidden="true">{p.icon}</div>
+              <h3 id={`proj-${p.id}`} class="mb-2 text-xl font-bold text-ink">{p.title}</h3>
+              <p class="mb-3 text-sm text-muted">{p.description}</p>
+
+              <ul class="mb-4 list-disc space-y-1.5 pl-5 text-sm text-muted marker:text-game-cyan">
+                {p.highlights.map((h) => <li>{h}</li>)}
+              </ul>
+
+              <ul class="mb-5 flex flex-wrap gap-2" role="list" aria-label="Tecnologías">
+                {p.tech.map((t) => <li class="chip">{t}</li>)}
+              </ul>
+
+              {p.link ? (
+                <a
+                  href={p.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn-pixel !min-h-[44px] !px-4 !py-2 !text-[0.65rem]"
+                >
+                  {p.linkLabel} <span aria-hidden="true">↗</span>
+                  <span class="sr-only">(abre en una pestaña nueva)</span>
+                </a>
+              ) : (
+                <span class="font-pixel text-[0.6rem] text-muted">🔒 REPO PRÓXIMAMENTE</span>
+              )}
+            </div>
+          </article>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .cartridge {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--panel);
+    border: 3px solid var(--border);
+    border-radius: 0.75rem 0.75rem 0.25rem 0.25rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.15s ease-out, border-color 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform;
+  }
+
+  .cartridge:hover,
+  .cartridge:focus-within {
+    border-color: var(--accent);
+    box-shadow: var(--glow);
+  }
+
+  .cartridge-label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    color: #ffffff;
+    background: linear-gradient(90deg, #1d4ed8, #2563eb, #6d28d9);
+    border-bottom: 3px solid var(--text);
+  }
+
+  .cartridge-body {
+    flex: 1;
+    padding: 1.25rem;
+  }
+
+  .chip {
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text);
+    background: color-mix(in srgb, var(--blue) 14%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+</style>
+
+<script>
+  const root = document.documentElement;
+  const canTilt =
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (canTilt) {
+    document.querySelectorAll<HTMLElement>('.cartridge').forEach((card) => {
+      card.addEventListener('pointermove', (e) => {
+        if (root.classList.contains('no-motion')) return;
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.setProperty('--ry', `${(x * 10).toFixed(2)}deg`);
+        card.style.setProperty('--rx', `${(-y * 10).toFixed(2)}deg`);
+      });
+      card.addEventListener('pointerleave', () => {
+        card.style.setProperty('--rx', '0deg');
+        card.style.setProperty('--ry', '0deg');
+      });
+    });
+  }
+</script>

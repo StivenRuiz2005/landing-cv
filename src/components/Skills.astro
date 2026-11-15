@@ -1,0 +1,153 @@
+---
+import skills from '../data/skills.json';
+
+const categories = [
+  { id: 'frontend', label: 'FRONTEND', icon: '🎨' },
+  { id: 'backend', label: 'BACKEND', icon: '⚙️' },
+  { id: 'database', label: 'BASES DE DATOS', icon: '🗄️' },
+  { id: 'devops', label: 'DEVOPS', icon: '🐳' },
+  { id: 'cloud', label: 'CLOUD', icon: '☁️' },
+  { id: 'tools', label: 'HERRAMIENTAS', icon: '🛠️' },
+];
+
+const groups = categories
+  .map((c) => ({ ...c, items: skills.filter((s) => s.category === c.id) }))
+  .filter((g) => g.items.length > 0);
+
+const totalXp = skills.reduce((sum, s) => sum + s.xp, 0);
+
+const rank = (level: number) =>
+  level >= 90 ? 'MAESTRO' : level >= 80 ? 'VETERANO' : level >= 70 ? 'ADEPTO' : 'APRENDIZ';
+---
+
+<section id="skills" class="section-container bg-game-dark-light/40" aria-labelledby="skills-heading">
+  <div class="mx-auto max-w-6xl">
+    <div class="reveal">
+      <h2 id="skills-heading" class="heading-pixel mb-6">
+        <span aria-hidden="true">⚔️</span> HABILIDADES <span aria-hidden="true">⚔️</span>
+      </h2>
+      <p class="mx-auto mb-12 max-w-2xl text-center text-muted">
+        Mi árbol de habilidades: {skills.length} tecnologías y
+        <strong class="text-game-cyan">{totalXp.toLocaleString('es-CO')} XP</strong> acumulados.
+        El nivel es una estimación de mi dominio actual.
+      </p>
+    </div>
+
+    <ul class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" role="list">
+      {groups.map((group) => (
+        <li class="reveal">
+          <article class="glass-panel h-full rounded-xl p-5" aria-labelledby={`cat-${group.id}`}>
+            <h3 id={`cat-${group.id}`} class="mb-5 flex items-center gap-2 font-pixel text-xs text-game-cyan">
+              <span aria-hidden="true">{group.icon}</span>
+              {group.label}
+            </h3>
+
+            <ul class="space-y-5" role="list">
+              {group.items.map((skill) => (
+                <li class="skill">
+                  <div class="mb-1.5 flex items-baseline justify-between gap-2">
+                    <span class="font-semibold text-ink">{skill.name}</span>
+                    <span class="font-pixel text-[0.6rem] text-game-purple" aria-hidden="true">
+                      LVL <span class="lvl-num" data-target={skill.level}>{skill.level}</span>
+                    </span>
+                  </div>
+
+                  <div
+                    class="skill-track"
+                    role="meter"
+                    aria-label={`${skill.name}, nivel ${skill.level} de 100, rango ${rank(skill.level)}`}
+                    aria-valuenow={skill.level}
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    <div class="skill-fill" style={`--w:${skill.level}%`}></div>
+                  </div>
+
+                  <p class="mt-1 text-right font-pixel text-[0.55rem] text-muted" aria-hidden="true">
+                    {rank(skill.level)} · {skill.xp.toLocaleString('es-CO')} XP
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </article>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .skill-track {
+    height: 14px;
+    overflow: hidden;
+    background: var(--surface-2);
+    border: 2px solid var(--border);
+  }
+
+  .skill-fill {
+    height: 100%;
+    width: var(--w);
+    background: linear-gradient(90deg, var(--blue), var(--accent), var(--purple));
+    background-size: 200% 100%;
+  }
+
+  /* Con JS, las barras empiezan vacías y se llenan al entrar en pantalla */
+  :global(.js) .skill-fill {
+    width: 0;
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  :global(.js) .skill-fill.in {
+    width: var(--w);
+  }
+</style>
+
+<script>
+  const root = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fills = document.querySelectorAll<HTMLElement>('.skill-fill');
+
+  function motionOff() {
+    return reduce || root.classList.contains('no-motion');
+  }
+
+  function fill(el: HTMLElement) {
+    el.classList.add('in');
+    const num = el.closest('.skill')?.querySelector<HTMLElement>('.lvl-num');
+    if (!num) return;
+    const target = Number(num.dataset.target ?? 0);
+
+    if (motionOff()) {
+      num.textContent = String(target);
+      return;
+    }
+
+    const start = performance.now();
+    const duration = 1200;
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / duration, 1);
+      num.textContent = String(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    fills.forEach((f) => f.classList.add('in'));
+  } else {
+    if (!motionOff()) {
+      document.querySelectorAll<HTMLElement>('.lvl-num').forEach((n) => (n.textContent = '0'));
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            fill(entry.target as HTMLElement);
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.4 }
+    );
+    fills.forEach((f) => io.observe(f));
+  }
+</script>

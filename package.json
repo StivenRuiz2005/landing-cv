@@ -1,0 +1,25 @@
+{
+  "name": "landing-cv",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.5",
+    "@tailwindcss/vite": "^4.3.5",
+    "astro": "^7.4.12",
+    "tailwindcss": "^4.3.5"
+  },
+  "description": "```sh npm create astro@latest -- --template minimal ```",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

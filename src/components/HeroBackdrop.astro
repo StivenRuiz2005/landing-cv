@@ -1,0 +1,152 @@
+---
+// Fondo synthwave: sol retro, horizonte y rejilla en perspectiva con parallax del mouse.
+---
+
+<canvas id="synth" class="absolute inset-0 -z-10 h-full w-full" aria-hidden="true"></canvas>
+<div class="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-b from-transparent to-game-dark" aria-hidden="true"></div>
+
+<script>
+  const canvas = document.getElementById('synth') as HTMLCanvasElement | null;
+  const ctx = canvas?.getContext('2d');
+
+  if (canvas && ctx) {
+    const root = document.documentElement;
+    const reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const colors = { blue: '#2563eb', accent: '#22d3ee', purple: '#8b5cf6' };
+
+    let w = 0, h = 0, t = 0, mx = 0, targetMx = 0;
+    let running = false, visible = true;
+
+    function readColors() {
+      const cs = getComputedStyle(root);
+      colors.blue = cs.getPropertyValue('--blue').trim() || colors.blue;
+      colors.accent = cs.getPropertyValue('--accent').trim() || colors.accent;
+      colors.purple = cs.getPropertyValue('--purple').trim() || colors.purple;
+    }
+
+    function resize() {
+      const r = canvas!.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = r.width;
+      h = r.height;
+      canvas!.width = w * dpr;
+      canvas!.height = h * dpr;
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function draw() {
+      const c = ctx!;
+      const dark = root.classList.contains('dark');
+      c.clearRect(0, 0, w, h);
+
+      const horizon = h * 0.58;
+      const vx = w / 2 + mx * w * 0.08;
+
+      // Sol con franjas
+      const sr = Math.min(w, h) * 0.22;
+      const sy = horizon - sr * 0.55;
+      const g = c.createLinearGradient(0, sy - sr, 0, sy + sr);
+      g.addColorStop(0, colors.accent);
+      g.addColorStop(1, colors.purple);
+
+      c.save();
+      c.globalAlpha = dark ? 0.6 : 0.4;
+      c.beginPath();
+      c.arc(vx, sy, sr, 0, Math.PI * 2);
+      c.clip();
+      c.fillStyle = g;
+      c.fillRect(vx - sr, sy - sr, sr * 2, sr * 2);
+      c.globalCompositeOperation = 'destination-out';
+      for (let i = 0; i < 7; i++) {
+        c.fillRect(vx - sr, sy + sr * 0.1 + i * sr * 0.14, sr * 2, 2 + i * 1.6);
+      }
+      c.restore();
+
+      // Línea del horizonte
+      c.strokeStyle = colors.accent;
+      c.globalAlpha = 0.8;
+      c.lineWidth = 2;
+      c.beginPath();
+      c.moveTo(0, horizon);
+      c.lineTo(w, horizon);
+      c.stroke();
+
+      // Rejilla: líneas horizontales que avanzan hacia ti
+      c.strokeStyle = colors.blue;
+      c.lineWidth = 1.5;
+      const n = 14;
+      const frac = t % 1;
+      for (let i = 0; i < n; i++) {
+        const p = (i + frac) / n;
+        const y = horizon + Math.pow(p, 2.2) * (h - horizon);
+        c.globalAlpha = 0.15 + p * 0.6;
+        c.beginPath();
+        c.moveTo(0, y);
+        c.lineTo(w, y);
+        c.stroke();
+      }
+
+      // Rejilla: líneas verticales convergentes
+      c.globalAlpha = 0.45;
+      for (let i = -18; i <= 18; i++) {
+        c.beginPath();
+        c.moveTo(vx + i * w * 0.012, horizon);
+        c.lineTo(vx + i * w * 0.16, h);
+        c.stroke();
+      }
+      c.globalAlpha = 1;
+    }
+
+    function shouldAnimate() {
+      return !reduceMQ.matches && !root.classList.contains('no-motion') && visible && !document.hidden;
+    }
+
+    function loop() {
+      if (!running) return;
+      mx += (targetMx - mx) * 0.05;
+      t += 0.006;
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    function sync() {
+      if (shouldAnimate()) {
+        if (!running) {
+          running = true;
+          requestAnimationFrame(loop);
+        }
+      } else {
+        running = false;
+        draw();
+      }
+    }
+
+    readColors();
+    resize();
+    sync();
+
+    window.addEventListener('resize', resize);
+    document.addEventListener('visibilitychange', sync);
+    reduceMQ.addEventListener('change', sync);
+
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      window.addEventListener('pointermove', (e) => {
+        targetMx = (e.clientX / window.innerWidth - 0.5) * 2;
+      });
+    }
+
+    // Pausa cuando el hero no se ve
+    new IntersectionObserver((entries) => {
+      visible = entries[0].isIntersecting;
+      sync();
+    }).observe(canvas);
+
+    // Reacciona al cambio de tema y al botón de pausar
+    new MutationObserver(() => {
+      readColors();
+      sync();
+      if (!running) draw();
+    }).observe(root, { attributes: true, attributeFilter: ['class'] });
+  }
+</script>
