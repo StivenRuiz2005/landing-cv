@@ -1,0 +1,54 @@
+[
+  {
+    "id": "invessoft",
+    "type": "work",
+    "status": "active",
+    "icon": "⚔️",
+    "role": "Desarrollador Full Stack",
+    "org": "Webcloster S.A.S. – Invessoft",
+    "period": "Septiembre 2025 – Actualidad",
+    "summary": "Desarrollo y mantenimiento de una plataforma empresarial en producción para gestión de eventos, encuestas y CRM.",
+    "highlights": [
+      "APIs REST con NestJS y Node.js, y PostgreSQL mediante TypeORM.",
+      "Interfaces y funcionalidades con Angular y TypeScript.",
+      "Configuraciones personalizables para el inicio de sesión por evento.",
+      "Nuevos filtros y funcionalidades en módulos CRM.",
+      "Mejoras en encuestas, gestión de eventos y evaluaciones.",
+      "Pruebas automatizadas, corrección de incidencias y trabajo con Git en equipo."
+    ],
+    "tags": ["Angular", "TypeScript", "NestJS", "PostgreSQL", "TypeORM"],
+    "url": "https://invessoft.app",
+    "urlLabel": "Ver Invessoft"
+  },
+  {
+    "id": "univalle",
+    "type": "study",
+    "status": "active",
+    "icon": "🎓",
+    "role": "Ingeniería de Sistemas",
+    "org": "Universidad del Valle",
+    "period": "Décimo semestre",
+    "summary": "Formación en arquitectura de software, bases de datos, computación en la nube, análisis de datos e inteligencia artificial.",
+    "highlights": [
+      "Proyecto de microservicios con despliegue en AWS (2025).",
+      "Proyecto de análisis predictivo con más de 7 millones de registros."
+    ],
+    "tags": ["Arquitectura", "Datos", "Cloud"],
+    "url": null,
+    "urlLabel": ""
+  },
+  {
+    "id": "sena",
+    "type": "study",
+    "status": "done",
+    "icon": "🏅",
+    "role": "Técnico en Programación de Software",
+    "org": "SENA",
+    "period": "2021",
+    "summary": "Primer nivel del recorrido: bases de programación y desarrollo de software.",
+    "highlights": [],
+    "tags": ["Programación"],
+    "url": null,
+    "urlLabel": ""
+  }
+]

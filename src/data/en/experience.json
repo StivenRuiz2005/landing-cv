@@ -1,0 +1,54 @@
+[
+  {
+    "id": "invessoft",
+    "type": "work",
+    "status": "active",
+    "icon": "⚔️",
+    "role": "Full Stack Developer",
+    "org": "Webcloster S.A.S. – Invessoft",
+    "period": "September 2025 – Present",
+    "summary": "Development and maintenance of an enterprise platform in production for event management, surveys and CRM.",
+    "highlights": [
+      "REST APIs with NestJS and Node.js, and PostgreSQL through TypeORM.",
+      "User interfaces and features with Angular and TypeScript.",
+      "Customizable per-event login configurations.",
+      "New filters and features in CRM modules.",
+      "Improvements to surveys, event management and assessments.",
+      "Automated testing, bug fixing and team workflow with Git."
+    ],
+    "tags": ["Angular", "TypeScript", "NestJS", "PostgreSQL", "TypeORM"],
+    "url": "https://invessoft.app",
+    "urlLabel": "Visit Invessoft"
+  },
+  {
+    "id": "univalle",
+    "type": "study",
+    "status": "active",
+    "icon": "🎓",
+    "role": "Systems Engineering",
+    "org": "Universidad del Valle",
+    "period": "10th semester",
+    "summary": "Training in software architecture, databases, cloud computing, data analysis and artificial intelligence.",
+    "highlights": [
+      "Microservices project deployed on AWS (2025).",
+      "Predictive analytics project with more than 7 million records."
+    ],
+    "tags": ["Architecture", "Data", "Cloud"],
+    "url": null,
+    "urlLabel": ""
+  },
+  {
+    "id": "sena",
+    "type": "study",
+    "status": "done",
+    "icon": "🏅",
+    "role": "Software Programming Technician",
+    "org": "SENA",
+    "period": "2021",
+    "summary": "First step of the journey: programming and software development fundamentals.",
+    "highlights": [],
+    "tags": ["Programming"],
+    "url": null,
+    "urlLabel": ""
+  }
+]

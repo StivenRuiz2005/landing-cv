@@ -1,0 +1,32 @@
+[
+  {
+    "id": "aws-cf",
+    "unlocked": true,
+    "icon": "🏆",
+    "title": "AWS Academy Cloud Foundations",
+    "issuer": "AWS Academy",
+    "date": "December 2024",
+    "description": "Fundamentals of AWS cloud computing.",
+    "url": "https://www.credly.com/go/M5wJLM0T"
+  },
+  {
+    "id": "cisco-cyber",
+    "unlocked": true,
+    "icon": "🛡️",
+    "title": "Introduction to Cybersecurity",
+    "issuer": "Cisco Networking Academy",
+    "date": "",
+    "description": "Fundamentals of information security and cybersecurity concepts.",
+    "url": null
+  },
+  {
+    "id": "aws-ccp",
+    "unlocked": false,
+    "icon": "🔒",
+    "title": "AWS Certified Cloud Practitioner (CLF-C02)",
+    "issuer": "AWS",
+    "date": "In preparation",
+    "description": "Next goal on my cloud path.",
+    "url": null
+  }
+]

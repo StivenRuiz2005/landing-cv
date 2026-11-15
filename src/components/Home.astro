@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BootScreen from './BootScreen.astro';
+import HUD from './HUD.astro';
+import Hero from './Hero.astro';
+import GameSystem from './GameSystem.astro';
+import Effects from './Effects.astro';
+import Skills from './Skills.astro';
+import Experience from './Experience.astro';
+import Projects from './Projects.astro';
+import Achievements from './Achievements.astro';
+import Contact from './Contact.astro';
+import { ui, type Lang } from '../i18n/ui';
+import { getData } from '../i18n/data';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+const { personal } = getData(lang);
+const a = t.about;
+const year = new Date().getFullYear();
+---
+
+<BaseLayout lang={lang} title={`${personal.name} | ${personal.title}`} description={personal.bio}>
+  <BootScreen lang={lang} />
+  <HUD lang={lang} />
+  <Hero lang={lang} />
+  <GameSystem />
+  <Effects />
+
+  <!-- ABOUT -->
+  <section id="about" class="section-container" aria-labelledby="about-heading">
+    <div class="reveal mx-auto max-w-4xl">
+      <h2 id="about-heading" class="heading-pixel mb-12">
+        <span class="text-game-purple" aria-hidden="true">←</span> {a.heading} <span class="text-game-purple" aria-hidden="true">→</span>
+      </h2>
+
+      <div class="glass-panel rounded-xl p-6 sm:p-8">
+        <p class="text-lg leading-relaxed text-muted">{personal.bio}</p>
+
+        <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div class="stat-card">
+            <div class="mb-2 text-3xl" aria-hidden="true">🎓</div>
+            <h3 class="mb-1 font-pixel text-xs text-game-cyan">{a.edu.title}</h3>
+            <p class="text-sm text-ink">{a.edu.l1}</p>
+            <p class="text-xs text-muted">{a.edu.l2}</p>
+          </div>
+
+          <div class="stat-card">
+            <div class="mb-2 text-3xl" aria-hidden="true">💼</div>
+            <h3 class="mb-1 font-pixel text-xs text-game-cyan">{a.exp.title}</h3>
+            <p class="text-sm text-ink">{a.exp.l1}</p>
+            <p class="text-xs text-muted">{a.exp.l2}</p>
+          </div>
+
+          <div class="stat-card">
+            <div class="mb-2 text-3xl" aria-hidden="true">🎯</div>
+            <h3 class="mb-1 font-pixel text-xs text-game-cyan">{a.focus.title}</h3>
+            <p class="text-sm text-ink">{a.focus.l1}</p>
+            <p class="text-xs text-muted">{a.focus.l2}</p>
+          </div>
+
+          <div class="stat-card">
+            <div class="mb-2 text-3xl" aria-hidden="true">📍</div>
+            <h3 class="mb-1 font-pixel text-xs text-game-cyan">{a.loc.title}</h3>
+            <p class="text-sm text-ink">{personal.location.split(',')[0]}</p>
+            <p class="text-xs text-muted">{a.loc.country}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Skills lang={lang} />
+  <Experience lang={lang} />
+  <Projects lang={lang} />
+  <Achievements lang={lang} />
+  <Contact lang={lang} />
+
+  <!-- FOOTER -->
+  <footer class="border-t-2 border-game-blue/40 py-8">
+    <div class="mx-auto max-w-7xl px-4 text-center">
+      <p class="mb-2 font-pixel text-xs text-game-cyan">{t.footer.thanks}</p>
+      <p class="text-sm text-muted">© {year} {personal.name} • {t.footer.made}</p>
+      <p class="mt-2 text-xs text-muted">
+        {t.footer.egg} <span aria-hidden="true">🎮</span>
+      </p>
+    </div>
+  </footer>
+</BaseLayout>

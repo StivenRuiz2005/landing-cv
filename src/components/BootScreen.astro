@@ -1,6 +1,11 @@
 ---
 // Pantalla de arranque: una vez por sesión, saltable.
-// Para verla siempre al desarrollar entra a  http://localhost:4321/?boot
+// Para verla siempre al desarrollar:  /?boot   o   /en/?boot
+import { ui, type Lang } from '../i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang].boot;
 ---
 
 <script is:inline>
@@ -22,7 +27,7 @@
   })();
 </script>
 
-<div id="boot" class="boot" role="dialog" aria-modal="true" aria-label="Pantalla de carga del portafolio">
+<div id="boot" class="boot" role="dialog" aria-modal="true" aria-label={t.aria}>
   <div class="boot-inner">
     <p class="boot-logo" aria-hidden="true">CARLOS.DEV</p>
     <p class="boot-sub" aria-hidden="true">SYSTEM v1.0 · PLAYER ONE</p>
@@ -34,7 +39,7 @@
     </div>
     <p id="boot-pct" class="boot-pct" aria-hidden="true">0%</p>
 
-    <button id="boot-skip" type="button" class="boot-skip">Saltar intro</button>
+    <button id="boot-skip" type="button" class="boot-skip">{t.skip}</button>
   </div>
 </div>
 
@@ -110,6 +115,8 @@
 </style>
 
 <script>
+  import { t } from '../i18n/client';
+
   const root = document.documentElement;
   const boot = document.getElementById('boot');
 
@@ -119,13 +126,7 @@
     const pct = document.getElementById('boot-pct')!;
     const skip = document.getElementById('boot-skip')!;
 
-    const lines = [
-      'INICIANDO SISTEMA...',
-      'CARGANDO HABILIDADES... OK',
-      'CONECTANDO PROYECTOS... OK',
-      'SINCRONIZANDO LOGROS... OK',
-      'JUGADOR 1 LISTO',
-    ];
+    const lines: string[] = t.boot.lines;
 
     let done = false;
     const timers: number[] = [];

@@ -4,12 +4,12 @@ import sitemap from "@astrojs/sitemap";
 
 export default defineConfig({
   site: "https://stiven-ruiz-dev.vercel.app",
-  integrations: [sitemap()],
-  vite: {
-    plugins: [tailwindcss()],
-  },
-  build: {
-    inlineStylesheets: "auto",
-  },
+  integrations: [
+    sitemap({
+      i18n: { defaultLocale: "es", locales: { es: "es-CO", en: "en-US" } },
+    }),
+  ],
+  vite: { plugins: [tailwindcss()] },
+  build: { inlineStylesheets: "auto" },
   compressHTML: true,
 });

@@ -1,38 +1,49 @@
 ---
 import '../styles/global.css';
+import { ui, paths, type Lang } from '../i18n/ui';
 
 interface Props {
   title: string;
   description?: string;
+  lang?: Lang;
 }
 
-const {
-  title,
-  description = 'Ingeniero de Sistemas | Full Stack Developer especializado en Backend, APIs REST y análisis de datos.',
-} = Astro.props;
+const { lang = 'es', title, description = ui[lang].meta.description } = Astro.props;
+const t = ui[lang];
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const socialImageURL = new URL('/og-image.png', Astro.site);
+const site = Astro.site ?? new URL(Astro.url.origin);
+const canonicalURL = new URL(paths[lang], site);
+const urlEs = new URL(paths.es, site);
+const urlEn = new URL(paths.en, site);
+const socialImageURL = new URL('/og-image.png', site);
+const otherLocale = lang === 'es' ? ui.en.meta.ogLocale : ui.es.meta.ogLocale;
+
+// Textos para los scripts del navegador (se escapa "<" por seguridad)
+const i18nJson = JSON.stringify(t).replace(/</g, '\\u003c');
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <meta name="author" content="Carlos Stiven Ruiz Rojas" />
-    <meta name="keywords" content="Full Stack Developer, Backend Developer, Node.js, NestJS, Angular, TypeScript, Python, AWS, Ingeniero de Sistemas" />
+    <meta name="keywords" content={t.meta.keywords} />
 
     <link rel="canonical" href={canonicalURL} />
+    <link rel="alternate" hreflang="es" href={urlEs} />
+    <link rel="alternate" hreflang="en" href={urlEn} />
+    <link rel="alternate" hreflang="x-default" href={urlEs} />
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={socialImageURL} />
-    <meta property="og:locale" content="es_CO" />
+    <meta property="og:locale" content={t.meta.ogLocale} />
+    <meta property="og:locale:alternate" content={otherLocale} />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
@@ -50,7 +61,7 @@ const socialImageURL = new URL('/og-image.png', Astro.site);
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
     />
 
-    <!-- Aplica tema y preferencia de movimiento ANTES de pintar (sin parpadeo) -->
+    <!-- Tema y movimiento ANTES de pintar (sin parpadeo) -->
     <script is:inline>
       (function () {
         var root = document.documentElement;
@@ -68,13 +79,13 @@ const socialImageURL = new URL('/og-image.png', Astro.site);
       })();
     </script>
 
-    <script type="application/ld+json" set:html={JSON.stringify({
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Person',
       name: 'Carlos Stiven Ruiz Rojas',
-      url: Astro.site?.toString(),
+      url: canonicalURL.toString(),
       jobTitle: 'Full Stack Developer',
-      description: 'Ingeniero de Sistemas especializado en desarrollo Full Stack y Backend',
+      description: t.meta.ldDescription,
       address: {
         '@type': 'PostalAddress',
         addressLocality: 'Tuluá',
@@ -83,14 +94,21 @@ const socialImageURL = new URL('/og-image.png', Astro.site);
       },
       alumniOf: { '@type': 'CollegeOrUniversity', name: 'Universidad del Valle' },
       knowsAbout: ['JavaScript', 'TypeScript', 'Node.js', 'NestJS', 'Angular', 'React', 'Python', 'AWS', 'Docker', 'PostgreSQL'],
-      sameAs: ['https://github.com/StivenRuiz2005', 'https://gitlab.com/carlosruizrojas2005', 'https://www.linkedin.com/in/stiven-ruiz',],
+      sameAs: [
+        'https://github.com/StivenRuiz2005',
+        'https://gitlab.com/carlosruizrojas2005',
+        'https://www.linkedin.com/in/stiven-ruiz',
+      ],
     })} />
 
     <title>{title}</title>
   </head>
 
   <body class="relative min-h-screen overflow-x-hidden">
-    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+    <!-- Textos del idioma activo para los scripts -->
+    <script type="application/json" id="i18n" is:inline set:html={i18nJson} />
+
+    <a href="#main-content" class="skip-link">{t.skip}</a>
 
     <!-- Fondo decorativo -->
     <div class="fixed inset-0 -z-20 overflow-hidden" aria-hidden="true">
@@ -108,6 +126,8 @@ const socialImageURL = new URL('/og-image.png', Astro.site);
     <div id="live-region" class="sr-only" role="status" aria-live="polite"></div>
 
     <script>
+      import { t } from '../i18n/client';
+
       const root = document.documentElement;
 
       function announce(msg: string) {
@@ -122,7 +142,7 @@ const socialImageURL = new URL('/og-image.png', Astro.site);
         const dark = root.classList.toggle('dark');
         themeBtn.setAttribute('aria-pressed', String(dark));
         try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch {}
-        announce(dark ? 'Modo oscuro activado' : 'Modo claro activado');
+        announce(dark ? t.a11y.themeDark : t.a11y.themeLight);
       });
 
       /* ---------- Pausar animaciones ---------- */
@@ -134,22 +154,20 @@ const socialImageURL = new URL('/og-image.png', Astro.site);
       function syncMotion() {
         if (!motionBtn) return;
 
-        // Si el sistema pide menos movimiento, no se puede reactivar desde aquí
         if (osReduce) {
           root.classList.add('no-motion');
           motionBtn.disabled = true;
-          const msg = 'Animaciones desactivadas por la configuración de tu sistema';
-          motionBtn.title = msg;
-          if (motionLabel) motionLabel.textContent = msg;
-          if (motionText) motionText.textContent = 'SISTEMA';
+          motionBtn.title = t.a11y.system;
+          if (motionLabel) motionLabel.textContent = t.a11y.system;
+          if (motionText) motionText.textContent = t.a11y.animSystem;
           return;
         }
 
         const paused = root.classList.contains('no-motion');
-        const label = paused ? 'Reanudar animaciones' : 'Pausar animaciones';
+        const label = paused ? t.a11y.resume : t.a11y.pause;
         motionBtn.title = label;
         if (motionLabel) motionLabel.textContent = label;
-        if (motionText) motionText.textContent = paused ? 'ANIM OFF' : 'ANIM ON';
+        if (motionText) motionText.textContent = paused ? t.a11y.animOff : t.a11y.animOn;
       }
 
       syncMotion();
@@ -158,7 +176,7 @@ const socialImageURL = new URL('/og-image.png', Astro.site);
         const paused = root.classList.toggle('no-motion');
         try { localStorage.setItem('motion', paused ? 'off' : 'on'); } catch {}
         syncMotion();
-        announce(paused ? 'Animaciones pausadas' : 'Animaciones activadas');
+        announce(paused ? t.a11y.motionPaused : t.a11y.motionOn);
       });
 
       /* ---------- Reveal al hacer scroll ---------- */
@@ -198,10 +216,10 @@ const socialImageURL = new URL('/og-image.png', Astro.site);
 
       function activateEasterEgg() {
         window.dispatchEvent(new CustomEvent('game:award', {
-        detail: { id: 'konami', xp: 500, label: '🏆 Código Konami descubierto', urgent: true },
-        }));  
+          detail: { id: 'konami', xp: 500, label: t.game.konami, urgent: true },
+        }));
 
-        announce('Logro desbloqueado: Master of Secrets');
+        announce(t.konami.announce);
         const animate = !root.classList.contains('no-motion') && !osReduce;
 
         if (animate) {
@@ -227,8 +245,19 @@ const socialImageURL = new URL('/og-image.png', Astro.site);
 
         const box = document.createElement('div');
         box.setAttribute('aria-hidden', 'true');
-        box.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10000;background:rgba(10,20,64,.95);border:4px solid #22D3EE;padding:2rem;border-radius:1rem;text-align:center;font-family:'Press Start 2P',cursive;color:#22D3EE;box-shadow:0 0 40px rgba(34,211,238,.6);`;
-        box.innerHTML = `<div style="font-size:2rem;margin-bottom:1rem">🏆</div><div style="font-size:.8rem;margin-bottom:.5rem">¡LOGRO DESBLOQUEADO!</div><div style="font-size:.6rem;color:#67E8F9">MASTER OF SECRETS</div>`;
+        box.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10000;background:rgba(10,20,64,.95);border:4px solid #22D3EE;padding:2rem;border-radius:1rem;text-align:center;font-family:'Press Start 2P',cursive;color:#22D3EE;box-shadow:0 0 40px rgba(34,211,238,.6);max-width:90vw;`;
+
+        const icon = document.createElement('div');
+        icon.style.cssText = 'font-size:2rem;margin-bottom:1rem';
+        icon.textContent = '🏆';
+        const title = document.createElement('div');
+        title.style.cssText = 'font-size:.8rem;margin-bottom:.5rem;line-height:1.6';
+        title.textContent = t.konami.title;
+        const sub = document.createElement('div');
+        sub.style.cssText = 'font-size:.6rem;color:#67E8F9';
+        sub.textContent = t.konami.sub;
+        box.append(icon, title, sub);
+
         document.body.appendChild(box);
         setTimeout(() => box.remove(), 3000);
       }

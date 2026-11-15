@@ -1,35 +1,42 @@
 ---
 import skills from '../data/skills.json';
+import { ui, fmt, type Lang } from '../i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+const s = t.skills;
 
 const categories = [
-  { id: 'frontend', label: 'FRONTEND', icon: '🎨' },
-  { id: 'backend', label: 'BACKEND', icon: '⚙️' },
-  { id: 'database', label: 'BASES DE DATOS', icon: '🗄️' },
-  { id: 'devops', label: 'DEVOPS', icon: '🐳' },
-  { id: 'cloud', label: 'CLOUD', icon: '☁️' },
-  { id: 'tools', label: 'HERRAMIENTAS', icon: '🛠️' },
+  { id: 'frontend', icon: '🎨' },
+  { id: 'backend', icon: '⚙️' },
+  { id: 'database', icon: '🗄️' },
+  { id: 'devops', icon: '🐳' },
+  { id: 'cloud', icon: '☁️' },
+  { id: 'tools', icon: '🛠️' },
 ];
 
 const groups = categories
-  .map((c) => ({ ...c, items: skills.filter((s) => s.category === c.id) }))
+  .map((c) => ({ ...c, label: s.categories[c.id], items: skills.filter((k) => k.category === c.id) }))
   .filter((g) => g.items.length > 0);
 
-const totalXp = skills.reduce((sum, s) => sum + s.xp, 0);
+const totalXp = skills.reduce((sum, k) => sum + k.xp, 0);
+const fmtNum = (n: number) => n.toLocaleString(t.meta.numberLocale);
 
 const rank = (level: number) =>
-  level >= 90 ? 'MAESTRO' : level >= 80 ? 'VETERANO' : level >= 70 ? 'ADEPTO' : 'APRENDIZ';
+  level >= 90 ? s.ranks.master : level >= 80 ? s.ranks.veteran : level >= 70 ? s.ranks.adept : s.ranks.apprentice;
 ---
 
 <section id="skills" class="section-container bg-game-dark-light/40" aria-labelledby="skills-heading">
   <div class="mx-auto max-w-6xl">
     <div class="reveal">
       <h2 id="skills-heading" class="heading-pixel mb-6">
-        <span aria-hidden="true">⚔️</span> HABILIDADES <span aria-hidden="true">⚔️</span>
+        <span aria-hidden="true">⚔️</span> {s.heading} <span aria-hidden="true">⚔️</span>
       </h2>
       <p class="mx-auto mb-12 max-w-2xl text-center text-muted">
-        Mi árbol de habilidades: {skills.length} tecnologías y
-        <strong class="text-game-cyan">{totalXp.toLocaleString('es-CO')} XP</strong> acumulados.
-        El nivel es una estimación de mi dominio actual.
+        {fmt(s.introPre, { n: skills.length })}
+        <strong class="text-game-cyan">{fmtNum(totalXp)} XP</strong>
+        {s.introPost}
       </p>
     </div>
 
@@ -48,14 +55,14 @@ const rank = (level: number) =>
                   <div class="mb-1.5 flex items-baseline justify-between gap-2">
                     <span class="font-semibold text-ink">{skill.name}</span>
                     <span class="font-pixel text-[0.6rem] text-game-purple" aria-hidden="true">
-                      LVL <span class="lvl-num" data-target={skill.level}>{skill.level}</span>
+                      {s.lvl} <span class="lvl-num" data-target={skill.level}>{skill.level}</span>
                     </span>
                   </div>
 
                   <div
                     class="skill-track"
                     role="meter"
-                    aria-label={`${skill.name}, nivel ${skill.level} de 100, rango ${rank(skill.level)}`}
+                    aria-label={fmt(s.meter, { name: skill.name, level: skill.level, rank: rank(skill.level) })}
                     aria-valuenow={skill.level}
                     aria-valuemin="0"
                     aria-valuemax="100"
@@ -64,7 +71,7 @@ const rank = (level: number) =>
                   </div>
 
                   <p class="mt-1 text-right font-pixel text-[0.55rem] text-muted" aria-hidden="true">
-                    {rank(skill.level)} · {skill.xp.toLocaleString('es-CO')} XP
+                    {rank(skill.level)} · {fmtNum(skill.xp)} XP
                   </p>
                 </li>
               ))}
@@ -91,7 +98,6 @@ const rank = (level: number) =>
     background-size: 200% 100%;
   }
 
-  /* Con JS, las barras empiezan vacías y se llenan al entrar en pantalla */
   :global(.js) .skill-fill {
     width: 0;
     transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);

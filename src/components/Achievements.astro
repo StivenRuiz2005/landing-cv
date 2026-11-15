@@ -1,16 +1,21 @@
 ---
-import certs from '../data/certifications.json';
+import { ui, type Lang } from '../i18n/ui';
+import { getData } from '../i18n/data';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+const a = t.achievements;
+const certs = getData(lang).certs;
 ---
 
 <section id="achievements" class="section-container" aria-labelledby="achievements-heading">
   <div class="mx-auto max-w-5xl">
     <div class="reveal">
       <h2 id="achievements-heading" class="heading-pixel mb-6">
-        <span aria-hidden="true">🏆</span> LOGROS <span aria-hidden="true">🏆</span>
+        <span aria-hidden="true">🏆</span> {a.heading} <span aria-hidden="true">🏆</span>
       </h2>
-      <p class="mx-auto mb-12 max-w-2xl text-center text-muted">
-        Certificaciones desbloqueadas y los próximos objetivos.
-      </p>
+      <p class="mx-auto mb-12 max-w-2xl text-center text-muted">{a.intro}</p>
     </div>
 
     <ul class="grid grid-cols-1 gap-6 md:grid-cols-3" role="list">
@@ -23,7 +28,7 @@ import certs from '../data/certifications.json';
             <div class="mb-3 text-4xl" aria-hidden="true">{c.icon}</div>
 
             <p class="mb-2 font-pixel text-[0.55rem] text-game-purple">
-              {c.unlocked ? 'DESBLOQUEADO' : 'BLOQUEADO'}
+              {c.unlocked ? a.unlocked : a.locked}
             </p>
 
             <h3 id={`cert-${c.id}`} class="mb-1 text-lg font-bold text-ink">{c.title}</h3>
@@ -38,8 +43,8 @@ import certs from '../data/certifications.json';
                 rel="noopener noreferrer"
                 class="mt-3 inline-flex min-h-[44px] items-center gap-1 text-sm font-semibold text-game-cyan underline underline-offset-4 hover:text-game-cyan-light"
               >
-                Ver credencial <span aria-hidden="true">↗</span>
-                <span class="sr-only">(abre en una pestaña nueva)</span>
+                {a.cred} <span aria-hidden="true">↗</span>
+                <span class="sr-only">{t.newTab}</span>
               </a>
             )}
           </article>
@@ -50,15 +55,7 @@ import certs from '../data/certifications.json';
 </section>
 
 <style>
-  .trophy {
-    transition: transform 0.3s ease, border-color 0.3s ease;
-  }
-  .trophy:hover {
-    transform: translateY(-4px);
-    border-color: var(--accent);
-  }
-  .trophy.locked {
-    border-style: dashed;
-    opacity: 0.85;
-  }
+  .trophy { transition: transform 0.3s ease, border-color 0.3s ease; }
+  .trophy:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .trophy.locked { border-style: dashed; opacity: 0.85; }
 </style>

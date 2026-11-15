@@ -1,9 +1,10 @@
 ---
-// Efectos interactivos: typewriter, spotlight, cursor crosshair y títulos decodificados.
-// Todos respetan prefers-reduced-motion y el botón de pausa.
+// Efectos: typewriter, spotlight, cursor crosshair, títulos decodificados y XP por descargar el CV.
 ---
 
 <script>
+  import { t } from '../i18n/client';
+
   const root = document.documentElement;
   const osReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const motionOff = () => osReduce || root.classList.contains('no-motion');
@@ -136,7 +137,6 @@
           io.unobserve(h);
           if (motionOff()) return;
 
-          // Nombre accesible fijo, para que el lector no lea letras aleatorias
           const clean = Array.from(h.childNodes)
             .filter((n) => n.nodeType === 3)
             .map((n) => (n.textContent || '').trim())
@@ -153,10 +153,12 @@
     );
     document.querySelectorAll('h2.heading-pixel').forEach((h) => io.observe(h));
   }
+
+  /* ---------- 5. XP POR DESCARGAR EL CV ---------- */
   document.addEventListener('click', (e) => {
-  if ((e.target as HTMLElement).closest('[data-cv]')) {
+    if ((e.target as HTMLElement).closest('[data-cv]')) {
       window.dispatchEvent(new CustomEvent('game:award', {
-        detail: { id: 'cv', xp: 200, label: '📄 Descargaste el CV' },
+        detail: { id: 'cv', xp: 200, label: t.game.cv },
       }));
     }
   });
