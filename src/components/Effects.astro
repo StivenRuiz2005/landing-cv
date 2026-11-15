@@ -153,4 +153,11 @@
     );
     document.querySelectorAll('h2.heading-pixel').forEach((h) => io.observe(h));
   }
+  document.addEventListener('click', (e) => {
+  if ((e.target as HTMLElement).closest('[data-cv]')) {
+      window.dispatchEvent(new CustomEvent('game:award', {
+        detail: { id: 'cv', xp: 200, label: '📄 Descargaste el CV' },
+      }));
+    }
+  });
 </script>
