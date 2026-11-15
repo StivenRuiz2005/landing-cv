@@ -1,6 +1,5 @@
 ---
-// Sistema de XP y niveles. Los avisos se agrupan y salen de uno en uno,
-// solo cuando el usuario se detiene a mirar.
+// Sistema de XP y niveles: avisos rápidos, agrupados y sin saturar.
 ---
 
 <div
@@ -21,9 +20,7 @@
     box-shadow: 4px 4px 0 var(--shadow-hard), var(--glow);
     animation: toast-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  :global(.toast.levelup) {
-    border-color: var(--purple);
-  }
+  :global(.toast.levelup) { border-color: var(--purple); }
   :global(.toast .t-title) {
     font-family: var(--font-pixel);
     font-size: 0.6rem;
@@ -37,25 +34,23 @@
     transform: translateX(20px);
     transition: opacity 0.25s ease, transform 0.25s ease;
   }
-
-  @keyframes toast-in {
-    from { opacity: 0; transform: translateX(40px); }
-  }
+  @keyframes toast-in { from { opacity: 0; transform: translateX(40px); } }
 </style>
 
 <script>
   const KEY = 'game';
   const XP_PER_SECTION = 150;
-  const QUIET_MS = 1200;      // espera sin hacer scroll antes de mostrar un aviso
-  const WARMUP_MS = 4000;     // sin avisos durante los primeros segundos
-  const SHOW_MS = 3000;       // cuánto dura cada aviso
+  const QUIET_MS = 400;     // pausa de scroll antes de avisar
+  const WARMUP_MS = 1000;   // sin avisos el primer segundo
+  const SHOW_MS = 3000;     // duración de cada aviso
+  const GROUP_MS = 250;     // agrupa secciones que llegan juntas
 
   const SECTIONS: Record<string, string> = {
-    about: 'ABOUT ME',
-    skills: 'SKILL TREE',
-    experience: 'QUEST LOG',
-    projects: 'PROJECTS',
-    achievements: 'ACHIEVEMENTS',
+    about: 'SOBRE MI',
+    skills: 'HABILIDADES',
+    experience: 'EXPERIENCIA',
+    projects: 'PROYECTOS',
+    achievements: 'LOGROS',
     contact: 'NUEVA MISIÓN',
   };
 
@@ -83,7 +78,7 @@
   }
 
   /* ---------- Cola de avisos ---------- */
-  type Toast = { title: string; body: string; levelup?: boolean };
+  type Toast = { title: string; body: string; levelup?: boolean; urgent?: boolean };
   const queue: Toast[] = [];
   let showing = false;
   let lastScroll = 0;
@@ -96,14 +91,15 @@
 
   function pump() {
     if (showing || queue.length === 0) return;
-    if (!canShow()) {
-      setTimeout(pump, 400);
+    const next = queue[0];
+    if (!next.urgent && !canShow()) {
+      setTimeout(pump, 200);
       return;
     }
-    showing = true;
     const t = queue.shift()!;
     const box = document.getElementById('toasts');
-    if (!box) { showing = false; return; }
+    if (!box) return;
+    showing = true;
 
     const el = document.createElement('div');
     el.className = `toast${t.levelup ? ' levelup' : ''}`;
@@ -116,70 +112,68 @@
     el.append(title, body);
     box.replaceChildren(el);
 
-    const close = () => {
+    setTimeout(() => {
       el.classList.add('out');
       setTimeout(() => {
         el.remove();
         showing = false;
-        setTimeout(pump, 300);
+        pump();
       }, 260);
-    };
-    const timer = setTimeout(close, SHOW_MS);
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        clearTimeout(timer);
-        document.removeEventListener('keydown', onKey);
-        close();
-      }
-    };
-    document.addEventListener('keydown', onKey);
-    setTimeout(() => document.removeEventListener('keydown', onKey), SHOW_MS + 100);
+    }, SHOW_MS);
   }
 
   function notify(t: Toast) {
-    queue.push(t);
+    if (t.urgent) queue.unshift(t);
+    else queue.push(t);
     pump();
   }
 
-  /* ---------- Otorgar XP (agrupa lo que llega junto) ---------- */
-  let pending: { xp: number; labels: string[] } = { xp: 0, labels: [] };
+  /* ---------- Otorgar XP ---------- */
+  let pending = { xp: 0, labels: [] as string[] };
   let flushTimer: number | undefined;
 
   function flush() {
     const { xp, labels } = pending;
     pending = { xp: 0, labels: [] };
     if (xp === 0) return;
-
     const before = levelOf(state.xp - xp);
     const after = levelOf(state.xp);
-
-    const body =
-      labels.length === 1
-        ? labels[0]
-        : `Descubriste ${labels.length} secciones`;
-    notify({ title: `+${xp} XP`, body });
-
+    notify({
+      title: `+${xp} XP`,
+      body: labels.length === 1 ? labels[0] : `Descubriste ${labels.length} secciones`,
+    });
     if (after > before) {
       notify({ title: '¡LEVEL UP!', body: `Ahora eres nivel ${after}`, levelup: true });
     }
   }
 
-  function award(id: string, xp: number, label: string) {
-    if (state.seen.includes(id)) return;
+  function award(id: string, xp: number, label: string, urgent = false) {
+    if (state.seen.includes(id)) {
+      if (urgent) notify({ title: '🏆 YA LO TENÍAS', body: label, urgent: true });
+      return;
+    }
+    const before = levelOf(state.xp);
     state.seen.push(id);
     state.xp += xp;
     save();
     render();
 
-    pending.xp += xp;
-    pending.labels.push(label);
-    clearTimeout(flushTimer);
-    flushTimer = window.setTimeout(flush, 700);
+    if (urgent) {
+      notify({ title: `+${xp} XP`, body: label, urgent: true });
+      const after = levelOf(state.xp);
+      if (after > before) {
+        notify({ title: '¡LEVEL UP!', body: `Ahora eres nivel ${after}`, levelup: true, urgent: true });
+      }
+    } else {
+      pending.xp += xp;
+      pending.labels.push(label);
+      clearTimeout(flushTimer);
+      flushTimer = window.setTimeout(flush, GROUP_MS);
+    }
 
     const all = Object.keys(SECTIONS).every((s) => state.seen.includes(s));
     if (all && !state.seen.includes('explorer')) {
-      setTimeout(() => award('explorer', 100, '🏆 Explorador completo'), 1500);
+      setTimeout(() => award('explorer', 100, '🏆 Explorador completo'), 1200);
     }
   }
 
@@ -195,7 +189,7 @@
         award(id, XP_PER_SECTION, `Descubriste ${SECTIONS[id]}`);
       });
     },
-    { threshold: 0.5 }
+    { threshold: 0, rootMargin: '0px 0px -35% 0px' }
   );
   Object.keys(SECTIONS).forEach((id) => {
     const el = document.getElementById(id);
@@ -205,6 +199,6 @@
   /* ---------- Eventos externos (Konami, mensaje enviado) ---------- */
   window.addEventListener('game:award', (e) => {
     const d = (e as CustomEvent).detail;
-    award(d.id, d.xp, d.label);
+    award(d.id, d.xp, d.label, !!d.urgent);
   });
 </script>

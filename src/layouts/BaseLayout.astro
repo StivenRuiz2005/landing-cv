@@ -184,21 +184,22 @@ const socialImageURL = new URL('/og-image.png', Astro.site);
       const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
       let idx = 0;
       document.addEventListener('keydown', (e) => {
-        if (e.key === konami[idx]) {
+        const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+        if (k === konami[idx]) {
           idx++;
           if (idx === konami.length) {
             idx = 0;
             activateEasterEgg();
           }
         } else {
-          idx = e.key === konami[0] ? 1 : 0;
+          idx = k === konami[0] ? 1 : 0;
         }
       });
 
       function activateEasterEgg() {
         window.dispatchEvent(new CustomEvent('game:award', {
-          detail: { id: 'konami', xp: 500, label: '🏆 Código Konami descubierto' },
-        }));
+        detail: { id: 'konami', xp: 500, label: '🏆 Código Konami descubierto', urgent: true },
+        }));  
 
         announce('Logro desbloqueado: Master of Secrets');
         const animate = !root.classList.contains('no-motion') && !osReduce;
